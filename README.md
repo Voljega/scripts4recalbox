@@ -4,7 +4,9 @@ A script permitting the modifying of display order of systems.
 
 The script is using the original es_systems.cfg file situated in */recalbox/share_init/system/.emulationstation*, modify its content order and the copy it to */recalbox/share/system/.emulationstation*
 
-Be aware that this file will take precedence over the original one so you should regenerate the file after each update to be sure to keep an updtodate file
+```diff
++Be aware that this file will take precedence over the original one so you should regenerate the file after each update to be sure to keep an updtodate file
+```
 
 Script usage is simple : copy it where you like in the share partition then execute it with *python SystemSorter.py*
 
