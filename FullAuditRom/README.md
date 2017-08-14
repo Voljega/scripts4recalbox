@@ -1,4 +1,6 @@
-## Full Audit Rom 
+## Full Audit Rom
+
+Get it through the terminal with ``` wget https://raw.githubusercontent.com/Voljega/scripts4recalbox/master/FullAuditRom/FullAuditRom.py -O FullAuditRom.py ```
 
 This script allows you to launch an audit of all your roms
 

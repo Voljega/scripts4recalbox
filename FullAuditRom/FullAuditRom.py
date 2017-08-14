@@ -20,27 +20,30 @@ def get(i,e):
 
 def gameListExtraction (syst,roms) :
     gamelistFile = os.path.join(romsInDir,syst.name,"gamelist.xml")
-    parser = etree.XMLParser(encoding="utf-8")
-    games = etree.parse(gamelistFile, parser=parser).findall(".//game")
-    gs = []            
-    for g in games:
-        try :
-            path = get(g,'path')
-            gpath = os.path.join(romsInDir, syst.name , get(g,'path').encode('utf-8').replace('./','')) #full path to rom
-            name = get(g,'name')#.encode('utf-8') if get(g,'name') is not None else None
-            image = get(g,'image').encode('utf-8').replace('./','') if get(g,'image') is not None else None
-            imagePath = os.path.join(romsInDir, syst.name , image) if image is not None else None
-            imageExists = os.path.exists(imagePath) if imagePath is not None else False
-            gs.append(Game(gpath,name,imagePath,get(g,'hidden'),os.path.exists(gpath),imageExists,True))
-            if gpath in roms :
-                roms.remove(gpath)
+    gs = []
+    
+    if os.path.exists(gamelistFile) :
+        parser = etree.XMLParser(encoding="utf-8")
+        games = etree.parse(gamelistFile, parser=parser).findall(".//game")
+        
+        for g in games:
+            try :
+                path = get(g,'path')
+                gpath = os.path.join(romsInDir, syst.name , get(g,'path').encode('utf-8').replace('./','')) #full path to rom
+                name = get(g,'name')#.encode('utf-8') if get(g,'name') is not None else None
+                image = get(g,'image').encode('utf-8').replace('./','') if get(g,'image') is not None else None
+                imagePath = os.path.join(romsInDir, syst.name , image) if image is not None else None
+                imageExists = os.path.exists(imagePath) if imagePath is not None else False
+                gs.append(Game(gpath,name,imagePath,get(g,'hidden'),os.path.exists(gpath),imageExists,True))
+                if gpath in roms :
+                    roms.remove(gpath)
+                    
+            except :
+                print(sys.exc_info())
                 
-        except :
-            print(sys.exc_info())
-            
-    print("unscraped roms left : %i" % len(roms))
-    for r in roms :
-        gs.append(Game(r,None,None,None,True,False,False))
+        print("unscraped roms left : %i" % len(roms))
+        for r in roms :
+            gs.append(Game(r,None,None,None,True,False,False))
     
     return gs
     
