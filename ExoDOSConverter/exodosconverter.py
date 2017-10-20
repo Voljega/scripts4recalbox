@@ -38,7 +38,7 @@ def cleanCue(old,new,cleanName):
     newFile = open(new,'w')   
     for line in oldFile.readlines() :        
         if line.startswith("FILE") :
-            params = line.split('"')
+            params = line.split('"')            
             params[1] = cleanName + "." + params[1].split(".")[-1].lower()
             line = '"'.join(params)
             print("cue FILE line -> " +line.rstrip('\n\r'))
@@ -61,7 +61,7 @@ def cleanCDname(path,game,dest):
                 cleanName = cleanName[0:7]            
             dirPath = "\\".join(pathFile.split('\\')[:-1])
             for file in os.listdir(dirPath) :                
-                if len(file.split("."))>1 and file.split(".")[1].lower() == "cue" :
+                if len(file.split("."))>1 and file.split(".")[-1].lower() == "cue" :
                     print("create new clean cue file "+cleanName+"."+file.split(".")[-1])
                     sourceFile = file;
                     targetFile = cleanName+"."+file.split(".")[-1].lower();
@@ -78,7 +78,7 @@ def cleanCDname(path,game,dest):
                         os.remove(os.path.join(dirPath,file))
                         os.rename(target+"1",target)
                 elif file.split(".")[0].lower() == filename.split(".")[0].lower() :
-                    print("renamed %s to %s" %(file,cleanName+"."+file.split(".")[-1]))
+                    print("renamed %s to %s" %(file,cleanName+"."+file.split(".").lower()[-1]))
                     #double rename to avoid problems of same name with different case
                     os.rename(os.path.join(dirPath,file),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"))
                     os.rename(os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()))
