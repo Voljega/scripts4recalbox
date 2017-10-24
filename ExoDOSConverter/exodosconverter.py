@@ -78,7 +78,7 @@ def cleanCDname(path,game,dest):
                         os.remove(os.path.join(dirPath,file))
                         os.rename(target+"1",target)
                 elif file.split(".")[0].lower() == filename.split(".")[0].lower() :
-                    print("renamed %s to %s" %(file,cleanName+"."+file.split(".").lower()[-1]))
+                    print("renamed %s to %s" %(file,cleanName+"."+file.split(".")[-1].lower()))
                     #double rename to avoid problems of same name with different case
                     os.rename(os.path.join(dirPath,file),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"))
                     os.rename(os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()))
@@ -105,7 +105,7 @@ def handleCDMount(line,game,dest) :
             endIndex = count
         count = count + 1
     
-    paths = command[startIndex+1:endIndex]
+    paths = command[startIndex+1:endIndex]    
     prString = ""
     for path in paths :
         path = reducePath(path.replace('"',""),game)        
@@ -114,7 +114,13 @@ def handleCDMount(line,game,dest) :
             path = cleanCDname(path,game,dest)        
         prString = prString + " "+path
     
-    fullString = " ".join(command[0:startIndex+1]) + prString + " " + " ".join(command[endIndex:])    
+    # treat mount a and d here
+    if line.startswith("mount a") or line.startswith("mount d") :        
+        prString = dest.replace(outputDir+"\\","/recalbox/share/roms/dos/") + "/" + prString.strip()        
+        prString = ' "' + prString.replace("\\","/") +'"'        
+    
+    fullString = " ".join(command[0:startIndex+1]) + prString + " " + " ".join(command[endIndex:])
+    print(fullString)
     return fullString
 
 def createDosboxBat(lines,dbB,dbCCfg,game,dest) :
