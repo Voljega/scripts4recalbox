@@ -60,29 +60,31 @@ def cleanCDname(path,game,dest):
             if len(cleanName)>8 :
                 cleanName = cleanName[0:7]            
             dirPath = "\\".join(pathFile.split('\\')[:-1])
-            for file in os.listdir(dirPath) :                
-                if len(file.split("."))>1 and file.split(".")[-1].lower() == "cue" :
-                    print("create new clean cue file "+cleanName+"."+file.split(".")[-1])
-                    sourceFile = file;
-                    targetFile = cleanName+"."+file.split(".")[-1].lower();
-                    source = os.path.join(dirPath,sourceFile)
-                    target = os.path.join(dirPath,targetFile)
-#                    print("%s != %s %r" %(sourceFile.lower(),targetFile,not sourceFile.lower() == targetFile))
-#                    print("%s == %s %r" %(sourceFile.lower(),targetFile, sourceFile.lower() == targetFile))
-                    if not sourceFile.lower() == targetFile :
-                        cleanCue(source,target,cleanName)
-                        os.remove(os.path.join(dirPath,file))
+            for file in os.listdir(dirPath) :
+                if file.split(".")[0].lower() == filename.split(".")[0].lower() :        
+                    if len(file.split("."))>1 and file.split(".")[-1].lower() == "cue" :
+                        print("create new clean cue file "+cleanName+"."+file.split(".")[-1])
+                        print(file)
+                        sourceFile = file;
+                        targetFile = cleanName+"."+file.split(".")[-1].lower();
+                        source = os.path.join(dirPath,sourceFile)
+                        target = os.path.join(dirPath,targetFile)
+    #                    print("%s != %s %r" %(sourceFile.lower(),targetFile,not sourceFile.lower() == targetFile))
+    #                    print("%s == %s %r" %(sourceFile.lower(),targetFile, sourceFile.lower() == targetFile))
+                        if not sourceFile.lower() == targetFile :
+                            cleanCue(source,target,cleanName)
+                            os.remove(os.path.join(dirPath,file))
+                        else :
+                            print ("cue already well named")
+                            cleanCue(source,target+"1",cleanName)
+                            os.remove(os.path.join(dirPath,file))
+                            os.rename(target+"1",target)
                     else :
-                        print ("cue already well named")
-                        cleanCue(source,target+"1",cleanName)
-                        os.remove(os.path.join(dirPath,file))
-                        os.rename(target+"1",target)
-                elif file.split(".")[0].lower() == filename.split(".")[0].lower() :
-                    print("renamed %s to %s" %(file,cleanName+"."+file.split(".")[-1].lower()))
-                    #double rename to avoid problems of same name with different case
-                    os.rename(os.path.join(dirPath,file),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"))
-                    os.rename(os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()))
-                
+                        print("renamed %s to %s" %(file,cleanName+"."+file.split(".")[-1].lower()))
+                        #double rename to avoid problems of same name with different case
+                        os.rename(os.path.join(dirPath,file),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"))
+                        os.rename(os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()+"1"),os.path.join(dirPath,cleanName+"."+file.split(".")[-1].lower()))
+                    
             cleanedPath = "\\".join(pathList[:-1])+"\\"+cleanName+"."+ext.lower()
             print("modify dosbox.bat : %s -> %s" %(path,cleanedPath))
             return cleanedPath
@@ -167,7 +169,9 @@ def convertConfiguration(game,genre) :
         elif line.startswith("output"):
             dbCCfg.write("output=texture\n")
             dbCCfg.write("renderer = auto\n")
-            dbCCfg.write("vsync=false\n")
+            dbCCfg.write("vsync=false\n")            
+        elif line.startswith("buttonwrap") :            
+            dbCCfg.write("buttonwrap=false\n")
         elif line.startswith("mapperfile"):
             dbCCfg.write("mapperfile=mapper.map\n")
         elif line.startswith("ultradir"):
@@ -206,10 +210,14 @@ def handleMetadata(game,gamesDosDir) :
             name = confLine[1].rstrip('\n\r ')
             safeEscapedName = name.replace(":","")
             safeEscapedName = safeEscapedName.replace("/","-")
+            safeEscapedName = safeEscapedName.replace("?","")
+            safeEscapedName = safeEscapedName.replace("*","-")
         elif key == "Genre" :
             genre = confLine[1].rstrip('\n\r ')
         elif key == "SubGenre" :
             subgenre = confLine[1].rstrip('\n\r ')
+        elif key == "SubGenre2" :
+            subgenre = subgenre + " " + confLine[1].rstrip('\n\r ')
         elif key == "Publisher" :
             publisher = confLine[1].rstrip('\n\r ')
         elif key == "Developer" :
@@ -265,6 +273,11 @@ def copyGameFiles(game,genre):
     print("copy dosbox conf")
     shutil.copy2(os.path.join(exoDosDir,"Games","!dos",game,"dosbox.conf"),os.path.join(dest,"dosbox.conf"))    
 
+def copyMapper(game,genre):
+    source = dest = os.path.join(outputDir,"mapper.map")
+    dest = os.path.join(outputDir,genre,game+".pc","mapper.map")
+    shutil.copy2(source,dest)
+
 def writeGamelistEntry(gamelist,dosGame,game,genre):
     gamelist.write("    <game>\n")
     gamelist.write("        <path>./"+genre+"/"+game+".pc</path>\n")
@@ -278,35 +291,41 @@ def writeGamelistEntry(gamelist,dosGame,game,genre):
     gamelist.write("    </game>\n")
 
 def buildGenre(dosGame):
-    if dosGame.genre in ['Adventure','Sports']:
+    if dosGame.genre in ['Sports']:
         return dosGame.genre
+    elif "Adventure" in dosGame.genre and "Action" in dosGame.subgenre :
+        return "Action-Adventure"
+    elif "Adventure" in dosGame.genre :
+        return "Adventure"
     elif "Racing" in dosGame.genre :
         return "Race"
     elif dosGame.genre == 'Strategy' and "Board" in dosGame.subgenre:
         return 'Puzzle'
     elif dosGame.genre == 'Strategy' and not "Puzzle" in dosGame.subgenre:
-        return 'Strategy-Gestion pre-1990' if int(dosGame.year) < 1990 else 'Strategy-Gestion'
+        return 'Strategy-Gestion'
     elif dosGame.genre == 'Strategy' and "Puzzle" in dosGame.subgenre:
         return "Puzzle"
-    elif dosGame.genre == 'Simulation' and dosGame.subgenre == 'Managerial' :
-        return 'Strategy-Gestion pre-1990' if int(dosGame.year) < 1990 else 'Strategy-Gestion'
-#    elif dosGame.genre == 'Simulation' and dosGame.subgenre == 'Strategy' :
-#        return 'Strategy-Gestion pre-1990' if int(dosGame.year) < 1990 else 'Strategy-Gestion'
-    elif dosGame.genre == 'Simulation' and dosGame.subgenre == 'Sports' :
+    elif dosGame.genre == 'Simulation' and 'Managerial' in dosGame.subgenre :
+        return 'Strategy-Gestion'
+    elif dosGame.genre == 'Simulation' and 'Sports' in dosGame.subgenre :
         return 'Sports'
+    elif dosGame.genre == 'Simulation' and 'Pinball' in dosGame.subgenre :
+        return 'Pinball'
     elif dosGame.genre == 'Simulation' :
         return 'Simulation'
     elif dosGame.genre == 'RPG':
-        return 'RPG pre-1990' if int(dosGame.year) < 1990 else 'RPG'
-    elif dosGame.genre == 'Action' and dosGame.subgenre == 'Pinball':
+        return 'RPG'
+    elif dosGame.genre == 'Action' and 'Pinball' in dosGame.subgenre :
         return 'Pinball'
-    elif dosGame.genre == 'Action' and dosGame.subgenre == 'Shooter':
+    elif dosGame.genre == 'Action' and "Puzzle" in dosGame.subgenre:
+        return "Puzzle"
+    elif dosGame.genre == 'Action' and 'Shooter' in dosGame.subgenre :
         return 'ShootEmUp'
-    elif dosGame.genre == 'Action' and dosGame.subgenre == 'Platform':
+    elif dosGame.genre == 'Action' and 'Platform' in dosGame.subgenre :
         return 'Platform'
     elif dosGame.genre == 'Action' and 'FPS' in dosGame.subgenre :
         return 'Gun-FPS'
-    elif dosGame.genre == 'Action' and dosGame.subgenre == 'Fighting':
+    elif dosGame.genre == 'Action' and 'Fighting' in dosGame.subgenre :
         return 'BeatEmUp'
     elif dosGame.genre == 'Action' :
         return 'Action-Adventure'
@@ -348,6 +367,7 @@ def convert(nbGames):
         if not os.path.exists(os.path.join(outputDir,genre,game+".pc")):
             copyGameFiles(game,genre)        
             convertConfiguration(game,genre)
+            copyMapper(game,genre)
         
         print("----------- Finished conversion for %s -----------" %game)
         print("")
