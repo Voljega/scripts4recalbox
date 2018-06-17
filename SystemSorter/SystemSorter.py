@@ -7,13 +7,15 @@ inDir = '/recalbox/share_init/system/.emulationstation/es_systems.cfg'
 outDir = '/recalbox/share/system/.emulationstation/es_systems.cfg'
 
 # Sort orders
-standard = ['snes','nes','n64','gba','gbc','gb','fds','virtualboy','gw','megadrive','segacd','sega32x','mastersystem','gamegear','sg1000','psx','pcengine','pcenginecd','supergrafx','scummvm','fba','fba_libretro','mame','neogeo','atari2600','atari7800','lynx','ngp','ngpc','wswan','wswanc','prboom','vectrex','lutro','cavestory','atarist','amstradcpc','amiga600','amiga1200','msx','msx1','msx2','odyssey2','zx81','zxspectrum','moonlight','imageviewer','apple2','colecovision','c64','pc','dreamcast','gc','psp','wii','random','favorites']
-hardwareType = ['atari2600','odyssey2','colecovision','vectrex','nes','sg1000','atari7800','mastersystem','fds','pcengine','megadrive','pcenginecd','supergrafx','snes','segacd','sega32x','psx','n64','dreamcast','gc','wii','gw','gb','lynx','gamegear','virtualboy','gbc','ngp','ngpc','wswan','wswanc','gba','psp','neogeo','fba','fba_libretro','mame','apple2','c64','zx81','zxspectrum','msx','msx1','amstradcpc','msx2','atarist','amiga600','amiga1200','pc','scummvm','prboom','lutro','cavestory','moonlight','imageviewer','random','favorites']
-chronological=['apple2','atari2600','odyssey2','colecovision','c64','vectrex','gw','zx81','zxspectrum','nes','msx','msx1','sg1000','atari7800','amstradcpc','mastersystem','msx2','atarist','fds','pcengine','amiga600','megadrive','pcenginecd','supergrafx','gb','lynx','snes','gamegear','neogeo','segacd','sega32x','amiga1200','psx','virtualboy','n64','dreamcast','gbc','ngp','ngpc','wswan','wswanc','gba','gc','psp','wii','fba','fba_libretro','mame','pc','scummvm','prboom','lutro','cavestory','moonlight','imageviewer','random','favorites']
-retrochrono = chronological[::-1][12::] + chronological[-12::]
-manufacturer=['amstradcpc','apple2','atari2600','atari7800','atarist','lynx','wswan','wswanc','c64','amiga600','amiga1200','odyssey2','colecovision','vectrex','msx','msx1','msx2','pcengine','pcenginecd','supergrafx','neogeo','ngp','ngpc','gw','nes','fds','gb','snes','virtualboy','n64','gbc','gba','gc','wii','sg1000','mastersystem','megadrive','gamegear','segacd','sega32x','dreamcast','zx81','zxspectrum','psx','psp','fba','fba_libretro','mame','pc','scummvm','prboom','lutro','cavestory','moonlight','imageviewer','random','favorites']
-hmc=['atari2600','atari7800','odyssey2','colecovision','vectrex','pcengine','pcenginecd','supergrafx','nes','fds','snes','n64','gc','wii','sg1000','mastersystem','megadrive','segacd','sega32x','dreamcast','psx','lynx','wswan','wswanc','ngp','ngpc','gw','gb','virtualboy','gbc','gba','gamegear','psp','neogeo','fba','fba_libretro','mame','amstradcpc','atarist','apple2','c64','amiga600','amiga1200','msx','msx1','msx2','zx81','zxspectrum','pc','scummvm','prboom','lutro','cavestory','moonlight','imageviewer','random','favorites']
-user=['apple2','atari2600','odyssey2','colecovision','c64','vectrex','gw','zx81','zxspectrum','nes','msx','msx1','sg1000','atari7800','amstradcpc','mastersystem','msx2','atarist','fds','pcengine','amiga600','megadrive','pcenginecd','supergrafx','gb','lynx','snes','gamegear','neogeo','segacd','sega32x','amiga1200','psx','virtualboy','n64','dreamcast','gbc','ngp','ngpc','wswan','wswanc','gba','gc','psp','wii','fba','fba_libretro','mame','pc','scummvm','prboom','lutro','cavestory','moonlight','imageviewer','random','favorites']
+alphabetical = ['3do','amstradcpc','amiga600','amiga1200','apple2','atari2600','atari5200','atari7800','atarist','c64','cavestory','colecovision','daphne','dos','dreamcast','fba','fba_libretro','fds','gb','gba','gbc','gc','gamegear','gw','intellivision','jaguar','lutro','lynx','mame','mastersystem','megadrive','moonlight','msx','msx1','msx2','neogeo','ngp','ngpc','n64','nds','nes','o2em','pc98','pcengine','pcenginecd','ports','prboom','psx','psp','saturn','scummvm','sega32x','segacd','sg1000','supergrafx','snes','thomson','vectrex','virtualboy','wii','wswan','wswanc','x68000','zx81','zxspectrum','imageviewer','random','favorites']
+hardwareType = ['atari2600','o2em','intellivision','colecovision','vectrex','atari5200','nes','sg1000','atari7800','mastersystem','fds','pcengine','megadrive','pcenginecd','supergrafx','snes','segacd','sega32x','3do','jaguar','saturn','psx','n64','dreamcast','gc','wii','gw','gb','lynx','gamegear','virtualboy','gbc','ngp','ngpc','wswan','wswanc','gba','nds','psp','neogeo','fba','fba_libretro','mame','daphne','apple2','c64','zx81','pc98','zxspectrum','msx','msx1','amstradcpc','thomson','msx2','atarist','x68000','amiga600','amiga1200','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
+chronological =['apple2','atari2600','o2em','intellivision','colecovision','c64','vectrex','atari5200','gw','zx81','pc98','zxspectrum','nes','msx','msx1','sg1000','atari7800','amstradcpc','mastersystem','thomson','msx2','atarist','fds','x68000','pcengine','amiga600','megadrive','pcenginecd','supergrafx','gb','lynx','snes','gamegear','neogeo','segacd','sega32x','amiga1200','3do','jaguar','saturn','psx','virtualboy','n64','dreamcast','gbc','ngp','ngpc','wswan','wswanc','gba','gc','nds','psp','wii','daphne','fba','fba_libretro','mame','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
+retrochrono = chronological[::-1][13::] + chronological[-13::] #13 last systems not ordered chronologically
+manufacturer =['amstradcpc','apple2','atari2600','atari5200','atari7800','atarist','lynx','jaguar','wswan','wswanc','c64','amiga600','amiga1200','o2em','colecovision','vectrex','intellivision','msx','msx1','msx2','pc98','pcengine','pcenginecd','supergrafx','neogeo','ngp','ngpc','gw','nes','fds','gb','snes','virtualboy','n64','gbc','gba','gc','nds','wii','3do','sg1000','mastersystem','megadrive','gamegear','segacd','sega32x','saturn','dreamcast','x68000','zx81','zxspectrum','psx','psp','thomson','daphne','fba','fba_libretro','mame','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
+hmc =['atari2600','atari5200','atari7800','jaguar','o2em','colecovision','vectrex','intellivision','pcengine','pcenginecd','supergrafx','nes','fds','snes','n64','gc','wii','3do','sg1000','mastersystem','megadrive','segacd','sega32x','saturn','dreamcast','psx','lynx','wswan','wswanc','ngp','ngpc','gw','gb','virtualboy','gbc','gba','nds','gamegear','psp','daphne','neogeo','fba','fba_libretro','mame','amstradcpc','atarist','apple2','c64','amiga600','amiga1200','msx','msx1','msx2','pc98','x68000','zx81','zxspectrum','thomson','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
+user =['pc98','thomson','x68000','intellivision','atari5200','jaguar','nds','saturn','daphne','3do','apple2','atari2600','o2em','colecovision','c64','vectrex','gw','zx81','zxspectrum','nes','msx','msx1','sg1000','atari7800','amstradcpc','mastersystem','msx2','atarist','fds','pcengine','amiga600','megadrive','pcenginecd','supergrafx','gb','lynx','snes','gamegear','neogeo','segacd','sega32x','amiga1200','psx','virtualboy','n64','dreamcast','gbc','ngp','ngpc','wswan','wswanc','gba','gc','psp','wii','fba','fba_libretro','mame','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
+
+
 
 def get(i,e):
     ll=i.find(e)        
@@ -42,11 +44,11 @@ def listsystems(p):
 
 def buildSortType(sortType):
     if sortType == None :
-        sortType = raw_input("Please choose your system order : (S)tandard, (H)ardwareType, (C)hronological, (R)etrochronological, (M)anufacturer, Mi(x)ed or (U)ser : ").lower()
+        sortType = raw_input("Please choose your system order : (A)lphabetical, (H)ardwareType, (C)hronological, (R)etrochronological, (M)anufacturer, Mi(x)ed or (U)ser : ").lower()
     
-    if sortType in ['s','standard'] :
+    if sortType in ['a','alphabetical'] :
         print ("Standard Sort")
-        return standard
+        return alphabetical
     elif sortType in ['h','hardwaretype'] :
         print ("Hardware Type Sort")
         return hardwareType
@@ -69,6 +71,7 @@ def buildSortType(sortType):
         return None
 
 if __name__ == "__main__":
+    #print ("Diag test %i %i %i %i %i %i %i " %(len(alphabetical),len(hardwareType),len(chronological),len(retrochrono),len(manufacturer),len(hmc),len(user)))
     sortType = buildSortType(sys.argv[1].lower() if len(sys.argv) > 1 else None)
     print(sortType)
     if sortType != None :
