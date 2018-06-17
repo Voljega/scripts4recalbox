@@ -12,7 +12,7 @@ Script usage is simple : copy it where you like in the share partition then exec
 Additionaly you can specify the type of order you want to use directly on the command line i.e. *python SystemSorter.py m*
 
 Orders for now are :
-* **Standard** : original order of recalbox distribution  
+* **Alphabetical** : alphabetical order of systems by their usage name  
 * **Hardware Type** : ordered by chronological hardware type : home consoles, portable consoles, arcade, computers
 * **Chronological** : ordered by release date
 * **Retrochronological** : ordered by inversed release date (newer systems appear first)
@@ -20,4 +20,4 @@ Orders for now are :
 * **Mixed** : ordered by hardware type, then manufacturer, then chronological
 * **User** : by default, copies Standard but you can modify it to your liking, contact me if you want it included in the script
 
-You can use as command line or input parameter the first letter of the order or its full name
+You can use as command line or input parameter the first letter of the order (except for Mixed use x) or its full name
