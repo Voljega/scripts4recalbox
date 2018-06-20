@@ -23,11 +23,33 @@ def get(i,e):
 
 def writesystems(ll,f,sortlist):       
     root = etree.Element("systemList")    
-    print("Generating from a %i systems list" % len(sortlist))
-    for i in sortlist:
+    print("Generating from a %i ordered systems list" % len(sortlist))
+    print("Nb of systems found in your share_init es_systems.cfg : %i" % len(ll))
+    
+    # everything expect last 3 (imageviewer, random, favorite)
+    for i in sortlist[:-3]:
         for system in ll:
-            name = get(system,"name")             
-            if( name == i):                
+            name = get(system,"name")
+            if( name == i):
+                root.append(system)
+    
+    # check for custom user systems not in order list
+    for system in ll:
+        name = get(system,"name")
+        found = False
+        for i in sortlist:
+            if( name == i) :
+                found = True
+        
+        if not found :
+            print("Not found in ordered list : %s , adding at the end" %name)
+            root.append(system)
+    
+    # last 3 (imageviewer, random, favorites)
+    for i in sortlist[-3:]:
+        for system in ll:
+            name = get(system,"name")
+            if( name == i):
                 root.append(system)
     
     print ("Generated a new list of %i systems" %len(root.getchildren()))
