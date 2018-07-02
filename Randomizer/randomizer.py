@@ -39,6 +39,7 @@ def selectGame(syst,ctrlStr):
     command = command.replace('%EMULATOR%',emulator)
     command = command.replace('%CORE%',core)
     command = command.replace('%CONTROLLERSCONFIG%',ctrlStr)
+    command = command.replace('%NETPLAY%','')
     log("out: "+command)
     os.popen(command)
 
