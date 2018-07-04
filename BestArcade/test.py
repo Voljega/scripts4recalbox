@@ -33,13 +33,16 @@ def loadTest(testFile,key,allTests) :
     file.close()
     return tests
 
-def loadTests(fbaKey,mame2003Key,mame2010Key,sourceDir) :
+def loadTests(fbaKey,mame2003Key,mame2010Key,sourceDir,usingSystems) :
     allTests = dict()
-    fbaTests = loadTest(os.path.join(sourceDir,fbaKey+'.csv'), fbaKey, allTests)
-    print("    Found %i fba tests" %len(fbaTests))
-    mame2003Tests = loadTest(os.path.join(sourceDir,mame2003Key+'.csv'), mame2003Key, allTests)
-    print("    Found %i mame2003 tests" %len(mame2003Tests))
-    mame2010Tests = loadTest(os.path.join(sourceDir,mame2010Key+'.csv'), mame2010Key, allTests)
-    print("    Found %i mame2010 tests" %len(mame2010Tests))
+    if fbaKey in usingSystems :
+        fbaTests = loadTest(os.path.join(sourceDir,fbaKey+'.csv'), fbaKey, allTests)
+        print("    Found %i fba tests" %len(fbaTests))
+    if mame2003Key in usingSystems :
+        mame2003Tests = loadTest(os.path.join(sourceDir,mame2003Key+'.csv'), mame2003Key, allTests)
+        print("    Found %i mame2003 tests" %len(mame2003Tests))
+    if mame2010Key in usingSystems :
+        mame2010Tests = loadTest(os.path.join(sourceDir,mame2010Key+'.csv'), mame2010Key, allTests)
+        print("    Found %i mame2010 tests" %len(mame2010Tests))
     print("    Found %i cumulated tests" %len(allTests))
     return allTests

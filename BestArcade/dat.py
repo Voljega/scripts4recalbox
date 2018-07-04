@@ -10,7 +10,7 @@ def get(i,e):
 
 def parseDat(file):
     dats = dict()
-    parser = etree.XMLParser(encoding="utf-8")
+    parser = etree.XMLParser(encoding="utf-8")    
     games = etree.parse(file, parser=parser).findall(".//game")        
     if (len(games) > 0) : # remove systems with no games 
         for g in games:            
@@ -23,14 +23,14 @@ def parseDat(file):
     print('Dat %s : %i entries' %(file,len(dats)))
     return dats
 
-def parseDats(scriptDir,dataDir,keys,files) :
+def parseDats(scriptDir,dataDir,keys,files,usingSystems) :
     dats = dict()
     i = 0
     for file in files :
-        dats[keys[i]] = parseDat(os.path.join(scriptDir,dataDir,file))        
+        if keys[i] in usingSystems :
+            header = etree.parse(os.path.join(scriptDir,dataDir,file),etree.XMLParser(encoding="utf-8")).findall(".//header")
+            dats[keys[i]] = parseDat(os.path.join(scriptDir,dataDir,file))
+            dats[keys[i]+"Header"] = header[0]
         i = i+1
     return dats
-
-if __name__ == "__main__":
-    dats = parseDat('C:\DevZone\workspaceFX\scripts4recalbox\BestArcade\data\FB Alpha v0.2.97.43 (ClrMame Pro XML).dat')
-    
+  
