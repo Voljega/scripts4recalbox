@@ -3,6 +3,9 @@
 import xml.etree.ElementTree as etree
 import sys,os,glob,collections
 from random import randrange
+import time
+import pygame
+from pygame.locals import *
 
 cfgInDir = '/recalbox/share_init/system/.emulationstation/es_systems.cfg'
 romsInDir = '/recalbox/share/roms'
@@ -28,8 +31,30 @@ def systemList(p):
           
     return systems
 
+def showPic(image,syst) :
+    file = os.path.join(romsInDir, syst.name, image)
+    if os.path.exists(file) :
+        log('showPic %s' %file)
+        # INITS
+        pygame.init()
+        pygame.mouse.set_visible(0)
+        picture = pygame.image.load(file)
+        # # CREATE FULLSCREEN DISPLAY. X = 1920- Y = 1080
+        fullscreen = pygame.display.set_mode((1920,1080), FULLSCREEN)
+        # # PASTE PICTURE ON FULLSCREEN
+        x = (1920 - picture.get_width()) /2
+        y = (1080 - picture.get_height()) /2
+        fullscreen.blit(picture, (x,y))
+        # # SHOW FULLSCREEN 
+        pygame.display.flip()
+        # # WAIT 5 SECONDS (need import time)
+        time.sleep(5)
+        # # EXIT PYGAME (Not needed but recommanded)
+        pygame.display.quit()
+        pygame.quit()
+    
 # selects a game and launches command
-def selectGame(syst,ctrlStr):    
+def selectGame(syst,ctrlStr):
     game = syst.games[randrange(len(syst.games))]
     core = game.core if game.core != None else 'default'
     emulator = game.emulator if game.emulator != None else 'default'
@@ -40,6 +65,7 @@ def selectGame(syst,ctrlStr):
     command = command.replace('%CORE%',core)
     command = command.replace('%CONTROLLERSCONFIG%',ctrlStr)
     command = command.replace('%NETPLAY%','')
+    showPic(game.image,syst)
     log("out: "+command)
     os.popen(command)
 
@@ -62,9 +88,9 @@ def selectSystem(systems,syst):
                      log("%i games selected in %s directory" % (len(syst.games),syst.name))
                      return syst
             else :
-                     print(" ")                            
+                     print(" ")
     except :
-        print(sys.exc_info())
+        log(sys.exc_info())
     if len(syst.games) > 0 :
         return syst
     else :
@@ -77,15 +103,22 @@ def parseControllerCfg(arg):
        pname = "-p" + str(i) + "name"
        try:
            pindex = arg.index(pname)
-           arg[pindex+1] = '"' + arg[pindex+1] + '"'           
+           arg[pindex+1] = '"' + arg[pindex+1] + '"'
        except ValueError:
            print ("%s not in args list" %pname)
     
     return " ".join(arg)    
 
+def cleanLog() :
+    if os.path.exists(logDir + "randomlog.txt") :
+        f = open(logDir + "randomlog.txt","r")
+        if len(f.readlines()) > 200 :
+            os.remove(f)
+        f.close()
+    
 def log(stri):
     print(stri)
-    f = open(logDir + "randomlog.csv","a+")	
+    f = open(logDir + "randomlog.txt","a+")	
     f.write(stri +"\n")
     f.close()
     
@@ -96,6 +129,7 @@ def getSystem(systems, param):
        if s.name==name: return s
     
 if __name__ == "__main__":
+    cleanLog()
     log("---------")
     log("in: "+ " ".join(sys.argv))
     ctrlStr = parseControllerCfg(sys.argv[1:len(sys.argv)-2])    
@@ -104,3 +138,8 @@ if __name__ == "__main__":
     launchSyst = paramSystem if paramSystem != None else systems[randrange(len(systems))]    
     ssystem = selectSystem(systems,launchSyst)
     selectGame(ssystem,ctrlStr)
+    
+# initialisation
+# - generate rdm files
+# - generate gamelist
+# complete README with init thingy

@@ -33,13 +33,5 @@ If some game didn't launch you can look at the log */recalbox/share/randomlog.cs
 * If you used my SystemSorter script or duplicated your se_systems file there, you also need to modify */recalbox/share/system/.emulationstation/es_systems.cfg*
 * Kill EmulationStation with `/etc/init.d/S31emulationstation` stop (wait for it)
 * Copy the random folder into  */recalbox/share/roms* directory
-* If you want to use other systems on random, look into the gamelist file and copy an existing entry. What's important is to keep the path name along the side of what I did, but you can modify the name if you want.
-* You must also create the related file in the random folder.
-	Example : if you want to add nes as dedicated random launcher you have to create a *nes.rdm* file and can add the following entry in random's *gamelist.xml* :
-	```xml
-	<game>
-		<path>./nes.rdm</path>
-		<name>Super Nes Random Launcher</name>
-	</game>
-	```
+* Copy theme/random directory in /recalbox/share_init/system/.emulationstation/themes/recalbox-next
 * Now just reboot and it should work flawlessly :)
