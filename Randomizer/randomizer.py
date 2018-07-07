@@ -11,6 +11,8 @@ cfgInDir = '/recalbox/share_init/system/.emulationstation/es_systems.cfg'
 romsInDir = '/recalbox/share/roms'
 logDir= '/recalbox/share/'
 exclusionList = ['random','favorites','moonlight','imageviewer']
+backgroundPic = 'background-random-{reso}.png'
+reso = '1080'
 
 System = collections.namedtuple('System', 'name command games')
 Game =  collections.namedtuple('Game', 'path name image emulator core')
@@ -32,15 +34,19 @@ def systemList(p):
     return systems
 
 def showPic(image,syst) :
+    backgroundFile = os.path.join(romsInDir, 'random', 'downloaded_images',backgroundPic.replace('{reso}',reso))
+    log(backgroundFile)
     file = os.path.join(romsInDir, syst.name, image)
     if os.path.exists(file) :
         log('showPic %s' %file)
         # INITS
         pygame.init()
         pygame.mouse.set_visible(0)
+        backgroundPicture = pygame.image.load(backgroundFile)
         picture = pygame.image.load(file)
         # # CREATE FULLSCREEN DISPLAY. X = 1920- Y = 1080
         fullscreen = pygame.display.set_mode((1920,1080), FULLSCREEN)
+        fullscreen.blit(backgroundPicture, (0,0))
         # # PASTE PICTURE ON FULLSCREEN
         x = (1920 - picture.get_width()) /2
         y = (1080 - picture.get_height()) /2
@@ -119,7 +125,8 @@ def cleanLog() :
 def log(stri):
     print(stri)
     f = open(logDir + "randomlog.txt","a+")	
-    f.write(stri +"\n")
+    f.write(stri)
+    f.write('\n')
     f.close()
     
 # get a system by name
