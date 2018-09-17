@@ -26,12 +26,12 @@ configuration = dict()
 usingSystems = []
 
 def setFileCopy(romsetFile,genre,fileName,targetDir,useGenreSubFolder) :
-    a = 1
-#    if os.path.exists(romsetFile) :        
-#        if useGenreSubFolder :
-#            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,genre,fileName+".zip"))
-#        else :
-#            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,fileName+".zip"))        
+#    a = 1
+    if os.path.exists(romsetFile) :        
+        if useGenreSubFolder :
+            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,genre,fileName+".zip"))
+        else :
+            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,fileName+".zip"))        
 
 def computeScore(setKey,setDir,game,test) :
     score = test[setKey].status if setKey in test else -2
