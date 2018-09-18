@@ -1,10 +1,7 @@
 #!/usr/lib/python2.7/
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as etree
-import sys, collections
 import os.path
-import shutil
-import subprocess
 
 def cleanString(string) :
     return string.rstrip('\n\r ').lstrip()

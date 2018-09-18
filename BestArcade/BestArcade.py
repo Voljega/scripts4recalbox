@@ -6,7 +6,7 @@ import os.path
 import shutil
 import conf, fav, test, dat, gamelist
 
-scriptDir = r"C:\DevZone\workspaceFX\scripts4recalbox\BestArcade"
+scriptDir = r""
 
 dataDir = r"data"
 outputDir = r"output"
@@ -26,7 +26,7 @@ configuration = dict()
 usingSystems = []
 
 def setFileCopy(romsetFile,genre,fileName,targetDir,useGenreSubFolder) :
-#    a = 1
+#    print('mockCopyFile',romsetFile)
     if os.path.exists(romsetFile) :        
         if useGenreSubFolder :
             shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,genre,fileName+".zip"))
@@ -302,14 +302,16 @@ def useSystems(configuration) :
     return systems
     
 if __name__ == "__main__":
+    scriptDir = os.path.abspath(os.path.dirname(sys.argv[0]))
+    print('Script path : ',scriptDir)
     # load conf.conf
-    configuration = conf.loadConf(os.path.join(scriptDir,confFile))
+    configuration = conf.loadConf(os.path.join(scriptDir,confFile))    
     print('\n<--------- Load Configuration --------->')
     printDict(configuration)
     usingSystems = useSystems(configuration)
     # create setDict containing fav games
     print('\n<--------- Load Favorites Ini Files --------->')
-    fav.loadFavs(configuration,bioses,setDict)
+    fav.loadFavs(scriptDir,bioses,setDict)
     # parse dat files
     print('\n<--------- Load FBA & Mame Dats --------->')
     dats = dat.parseDats(scriptDir,dataDir,[fbaKey,mame2003Key,mame2010Key],['FBAlphav0.2.97.43.dat','mame2003.dat','mame2010.dat'],usingSystems)
@@ -321,6 +323,6 @@ if __name__ == "__main__":
     createSets(allTests,dats)
     print("\n<--------- Detecting errors ----------->")
     checkErrors(allTests,configuration['keepLevel'])
-# write gamelists, missing doctype on generated dat  ?
-# use directory from script
-# use windows thing
+
+# TODOS
+# missing doctype on generated dat  ?

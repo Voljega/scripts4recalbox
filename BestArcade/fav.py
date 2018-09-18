@@ -22,9 +22,9 @@ def parseSetFile(setFile, setDict) :
                 
     file.close()
 
-def loadFavs(configuration, bioses, setDict) :    
-    parseSetFile(os.path.join(configuration['scriptDir'],dataDir,smallSetFile),setDict)    
-    parseSetFile(os.path.join(configuration['scriptDir'],dataDir,bigSetFile),setDict)
+def loadFavs(scriptDir, bioses, setDict) :    
+    parseSetFile(os.path.join(scriptDir,dataDir,smallSetFile),setDict)    
+    parseSetFile(os.path.join(scriptDir,dataDir,bigSetFile),setDict)
     
     print('Nb Genre : %s' %len(setDict))    
     sumGames = 0
