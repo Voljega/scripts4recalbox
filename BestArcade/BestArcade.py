@@ -305,7 +305,8 @@ if __name__ == "__main__":
     scriptDir = os.path.abspath(os.path.dirname(sys.argv[0]))
     print('Script path : ',scriptDir)
     # load conf.conf
-    configuration = conf.loadConf(os.path.join(scriptDir,confFile))    
+    configuration = conf.loadConf(os.path.join(scriptDir,confFile))
+    input('Your outputDir is '+configuration['exportDir']+".\nIts content will be erased.\nIf you don't want to proceed, close this window, else press enter")    
     print('\n<--------- Load Configuration --------->')
     printDict(configuration)
     usingSystems = useSystems(configuration)
@@ -323,6 +324,7 @@ if __name__ == "__main__":
     createSets(allTests,dats)
     print("\n<--------- Detecting errors ----------->")
     checkErrors(allTests,configuration['keepLevel'])
+    input('<--------- Process finished ----------->')
 
 # TODOS
 # missing doctype on generated dat  ?
