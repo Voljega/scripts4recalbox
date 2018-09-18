@@ -2,6 +2,7 @@
 
 Use this tool to generate sorted romsets keeping only the games referenced in the [BestArcade4Recalbox list](https://docs.google.com/spreadsheets/d/1F5tBguhRxpj1AQcnDWF6AVSx4av_Gm3cDQedQB7IECk/edit?usp=sharing), above and equal to the working state level you choose.
 
+FBA_Libretro version currently handled is 0.2.97.43
 
 ### WHAT THIS TOOL DOESN'T DO :
 - It's not clrmamepro and will not check that your romsets are in the right version number
