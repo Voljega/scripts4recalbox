@@ -27,3 +27,5 @@ First modify the `conf.conf` file with your own parameters :
 
 Then just execute `BestArcade.exe`
 After execution your will find your generated romsets in your `exportDir`
+
+Build instructions are in `build.txt`
