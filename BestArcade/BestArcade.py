@@ -27,21 +27,22 @@ usingSystems = []
 
 def setFileCopy(romsetFile,genre,fileName,targetDir,useGenreSubFolder) :
 #    print('mockCopyFile',romsetFile)
-    if os.path.exists(romsetFile) :        
+    if os.path.exists(romsetFile) :
         if useGenreSubFolder :
             shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,genre,fileName+".zip"))
         else :
-            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,fileName+".zip"))        
+            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,fileName+".zip"))
 
 def computeScore(setKey,setDir,game,test) :
-    score = test[setKey].status if setKey in test else -2
+    score = test[setKey].status if (test is not None and setKey in test) else -2
     
     if score == -2 and os.path.exists(os.path.join(setDir,game+".zip")) :
         score = -1 
+    
     return score
 
 def keepSet(keepNotTested,exclusionType,keepLevel,scores,key,keep) :
-    maxScore = max(scores.values())   
+    maxScore = max(scores.values())
     if keepNotTested and scores[key] == -1 :
         keep.append(key)
     elif exclusionType == 'NONE' :
@@ -62,7 +63,7 @@ def writeCSV(csvFile,game,score,genre,dat,test,setKey) :
     else :
         name, year, manufacturer = '','',''
         
-    if setKey in test :
+    if test is not None and setKey in test :
         hardware = test[setKey].hardware
         comments = test[setKey].comments
         notes = test[setKey].notes
@@ -106,7 +107,7 @@ def writeGamelistEntry(gamelistFile,game,dat,genre,useGenreSubFolder,test,setKey
     else :
         fullName, name, year, developer, cloneof = '','','','',''
         
-    if setKey in test :
+    if test is not None and setKey in test :
         hardware = test[setKey].hardware
         comments = test[setKey].comments
         notes = test[setKey].notes
@@ -186,12 +187,10 @@ def createSets(allTests,dats) :
             audit = game +" -> "
             
             scores = dict()
-            if game in allTests :
-                 scores[fbaKey] = computeScore(fbaKey,configuration['fbaSet'],game,allTests[game]) if fbaKey in usingSystems else -2
-                 scores[mame2003Key] = computeScore(mame2003Key,configuration['mame2003Set'],game,allTests[game]) if mame2003Key in usingSystems else -2
-                 scores[mame2010Key] = computeScore(mame2010Key,configuration['mame2010Set'],game,allTests[game]) if mame2010Key in usingSystems else -2
-            else :
-                scores[fbaKey], scores[mame2003Key], scores[mame2010Key] = -2, -2, -2
+            testForGame = allTests[game] if game in allTests else None
+            scores[fbaKey] = computeScore(fbaKey,configuration['fbaSet'],game,testForGame) if fbaKey in usingSystems else -2
+            scores[mame2003Key] = computeScore(mame2003Key,configuration['mame2003Set'],game,testForGame) if mame2003Key in usingSystems else -2
+            scores[mame2010Key] = computeScore(mame2010Key,configuration['mame2010Set'],game,testForGame) if mame2010Key in usingSystems else -2                 
             
             audit = audit + " SCORES: "+ str(scores[fbaKey]) + " " + str(scores[mame2003Key]) + " " + str(scores[mame2010Key]) + " ,"                                    
             scoreSheet.write('%s;%i;%i;%i\n' %(game,scores[fbaKey], scores[mame2003Key], scores[mame2010Key]))
@@ -209,18 +208,18 @@ def createSets(allTests,dats) :
             
             if fbaKey in selected and fbaKey in usingSystems :
                 setFileCopy(fbaRom,genre,game,fbaKey,useGenreSubFolder)                
-                writeCSV(fbaCSV,game,scores[fbaKey],genre,dats[fbaKey],allTests[game],fbaKey)
-                writeGamelistEntry(fbaGamelist,game,dats[fbaKey],genre,useGenreSubFolder,allTests[game],fbaKey)
+                writeCSV(fbaCSV,game,scores[fbaKey],genre,dats[fbaKey],testForGame,fbaKey)
+                writeGamelistEntry(fbaGamelist,game,dats[fbaKey],genre,useGenreSubFolder,testForGame,fbaKey)
                 rootFba.append(dats[fbaKey][game].node) if game in dats[fbaKey] else None              
             if mame2003Key in selected and mame2003Key in usingSystems :    
                 setFileCopy(mame2003Rom,genre,game,mame2003Key,useGenreSubFolder)
-                writeCSV(mame2003CSV,game,scores[mame2003Key],genre,dats[mame2003Key],allTests[game],mame2003Key)
-                writeGamelistEntry(mame2003Gamelist,game,dats[mame2003Key],genre,useGenreSubFolder,allTests[game],mame2003Key)
+                writeCSV(mame2003CSV,game,scores[mame2003Key],genre,dats[mame2003Key],testForGame,mame2003Key)
+                writeGamelistEntry(mame2003Gamelist,game,dats[mame2003Key],genre,useGenreSubFolder,testForGame,mame2003Key)
                 rootMame2003.append(dats[mame2003Key][game].node) if game in dats[mame2003Key] else None
             if mame2010Key in selected and mame2010Key in usingSystems :
                 setFileCopy(mame2010Rom,genre,game,mame2010Key,useGenreSubFolder)
-                writeCSV(mame2010CSV,game,scores[mame2010Key],genre,dats[mame2010Key],allTests[game],mame2010Key)
-                writeGamelistEntry(mame2010Gamelist,game,dats[mame2010Key],genre,useGenreSubFolder,allTests[game],mame2010Key)
+                writeCSV(mame2010CSV,game,scores[mame2010Key],genre,dats[mame2010Key],testForGame,mame2010Key)
+                writeGamelistEntry(mame2010Gamelist,game,dats[mame2010Key],genre,useGenreSubFolder,testForGame,mame2010Key)
                 rootMame2010.append(dats[mame2010Key][game].node) if game in dats[mame2010Key] else None
          
             if len(selected) == 0 :                
