@@ -6,8 +6,8 @@ import os.path
 import shutil
 import subprocess
 
-exoDosDir = r"E:\No-Intro-Collection_2015-03-03\eXoDOS_Collection_v2.0"
-outputDir = r'E:\ExoDOSConverted'
+exoDosDir = r"G:\No-Intro-Collection_2015-03-03\ExoDos 3\eXoDOSSTR\eXoDOS"
+outputDir = r'G:\ExoDOSConverted'
 
 DosGame = collections.namedtuple('DosGame', 'name genre subgenre publisher developer year frontPic about')
 
@@ -353,7 +353,7 @@ def convert(nbGames):
         if not os.path.exists(os.path.join(exoDosDir,"Games",game)):
             print("%s needs installation" %game)
             #automatic F and N
-            subprocess.call("cmd /C (echo F&echo N) | Install.bat", cwd=os.path.join(gamesDosDir,game), shell=False)
+            subprocess.call("cmd /C (echo Y&echo F&echo N) | Install.bat", cwd=os.path.join(gamesDosDir,game), shell=False)
 #            subprocess.call("cmd /C Install.bat", cwd=os.path.join(gamesDosDir,game), shell=False)
             print("installed %s" %game)
         else :
@@ -367,7 +367,7 @@ def convert(nbGames):
         if not os.path.exists(os.path.join(outputDir,genre,game+".pc")):
             copyGameFiles(game,genre)        
             convertConfiguration(game,genre)
-            copyMapper(game,genre)
+#            copyMapper(game,genre)
         
         print("----------- Finished conversion for %s -----------" %game)
         print("")
