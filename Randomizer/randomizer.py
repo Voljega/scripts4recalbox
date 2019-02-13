@@ -118,9 +118,11 @@ def parseControllerCfg(arg):
 def cleanLog() :
     if os.path.exists(logDir + "randomlog.txt") :
         f = open(logDir + "randomlog.txt","r")
-        if len(f.readlines()) > 200 :
-            os.remove(f)
+        nbLines = len(f.readlines())
         f.close()
+        
+        if nbLines > 200 :            
+            os.remove(logDir + "randomlog.txt")        
     
 def log(stri):
     print(stri)
