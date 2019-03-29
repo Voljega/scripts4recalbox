@@ -20,10 +20,11 @@ FBA_Libretro version currently handled is 0.2.97.43
 ### USAGE :
 First modify the `conf.conf` file with your own parameters :
 - `exportDir` : the target directory for generation, warning its whole content will be erased (you will be prompted) at the begining of the script
-- `fbaSet`, `mame2003Set`, `mame2010Set` : the path to your original sets, this will be left untouched by the script
+- `fba_libretro`, `mame2003`, `mame2010` : the path to your original sets, this will be left untouched by the script
 - `keepLevel`: the working state level at which you will keep the roms in the generated romset (i.e keepLevel 2 will keep only MOSTLY_WORKING and WORKING roms)
 - `keepNotTested`: determines if untested roms will be kept or not
 - `exclusionType`: determines how roms will be kept (based on their working state level) if you use several romsets
+- `preferedSet`: in strict mode, if rom has same working level in several sets, preferedSet will be chosen
 - `genreSubFolders`: determines if your romset will use sub folders for genre or not
 
 Then just execute `BestArcade.exe`

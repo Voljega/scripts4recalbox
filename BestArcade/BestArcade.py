@@ -75,7 +75,9 @@ def writeCSV(csvFile,game,score,genre,dat,test,setKey) :
         notes = test[setKey].notes
     else :
         hardware,comments,notes = '','',''
-        
+    
+    genre = genre.replace('[','')
+    genre = genre.replace(']','')    
     csvFile.write("%i;%s;%s;%s;%s;%s;%s;%s;%s\n" 
                   %(score,genre,name,game,year,manufacturer,hardware,comments,notes))
 
@@ -105,7 +107,10 @@ def writeGamelistEntry(gamelistFile,game,dat,genre,useGenreSubFolder,test,setKey
         name = fullName
         if '(' in name :
             indPar = name.index('(')
-            name = name[:(indPar-1)].strip()            
+            name = name[:(indPar-1)].strip()
+        if '[' in name :
+            indPar = name.index('[')
+            name = name[:(indPar-1)].strip()                    
             
         year = dat[game].year if dat[game].year else ''
         developer = dat[game].manufacturer.replace('&', '&amp;') if dat[game].manufacturer else ''
@@ -296,11 +301,9 @@ if __name__ == "__main__":
     createSets(allTests,dats)
     print("\n<--------- Detecting errors ----------->")
     checkErrors(allTests,configuration['keepLevel'])
-    input('<--------- Process finished ----------->')
+    print('<--------- Process finished ----------->')
+    input('\n             (Press Enter)              ')
 
 # TODOS
 # missing doctype on generated dat  ?
-# also remove brackets content from name in game description
-# remove brackets in genre generated for csv
-# make required modifications
 # generate new release
