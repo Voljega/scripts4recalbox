@@ -11,9 +11,13 @@ scriptDir = r""
 dataDir = r"data"
 outputDir = r"output"
 confFile = r"conf.conf"
+
 fbaKey = "fba_libretro"
 mame2010Key = "mame2010"
 mame2003Key = "mame2003"
+setKeys = [fbaKey,mame2003Key,mame2010Key]
+datsDict = dict(zip(setKeys,['FBAlphav0.2.97.43.dat','mame2003.dat','mame2010.dat']))
+
 extension = ".zip"
 
 bioses = ['acpsx','atarisy1','cpzn1','cpzn2','cvs2gd','cvsgd','decocass','konamigv','konamigx','megaplay',
@@ -44,16 +48,18 @@ def computeScore(setKey,setDir,game,test) :
 def keepSet(keepNotTested,exclusionType,keepLevel,scores,key,keep) :
     maxScore = max(scores.values())
     if keepNotTested and scores[key] == -1 :
-        keep.append(key)
+        return True
     elif exclusionType == 'NONE' :
-        keep.append(key) if scores[key] >= keepLevel else None
+        return scores[key] >= keepLevel
     elif exclusionType == 'EQUAL' :
         if scores[key] == maxScore :
-            keep.append(key) if scores[key] >= keepLevel else None
+            return scores[key] >= keepLevel
     elif exclusionType == 'STRICT' :
         if scores[key] == maxScore :
-            if fbaKey not in keep and mame2010Key not in keep:
-                keep.append(key) if scores[key] >= keepLevel else None
+            if fbaKey not in keep and mame2010Key not in keep: # necessary while mame2003 is not fully tested
+                return scores[key] >= keepLevel
+            elif key == configuration['preferedSet'] :
+                return scores[key] >= keepLevel
                 
 def writeCSV(csvFile,game,score,genre,dat,test,setKey) :
     if game in dat :
@@ -127,101 +133,74 @@ def writeGamelistEntry(gamelistFile,game,dat,genre,useGenreSubFolder,test,setKey
 
 def createSets(allTests,dats) :
     
-    print("Cleaning output directory")
-    for file in os.listdir(os.path.join(configuration['exportDir'])) :
-        fullPath = os.path.join(configuration['exportDir'],file)        
-        shutil.rmtree(fullPath) if os.path.isdir(fullPath) else os.remove(fullPath)
-    
-    scoreSheet = open(os.path.join(configuration['exportDir'],"scoreSheet.csv"),"w",encoding="utf-8")
-    fbaCSV = open(os.path.join(configuration['exportDir'],fbaKey+".csv"),"w",encoding="utf-8") if fbaKey in usingSystems else None    
-    mame2003CSV = open(os.path.join(configuration['exportDir'],mame2003Key+".csv"),"w",encoding="utf-8") if mame2003Key in usingSystems else None    
-    mame2010CSV = open(os.path.join(configuration['exportDir'],mame2010Key+".csv"),"w",encoding="utf-8") if mame2010Key in usingSystems else None    
-    header="Status;Genre;Name (mame description);Rom name;Year;Manufacturer;Hardware;Comments;Notes\n"
-    fbaCSV.write(header) if fbaKey in usingSystems else None
-    mame2003CSV.write(header) if mame2003Key in usingSystems else None
-    mame2010CSV.write(header) if mame2010Key in usingSystems else None
-    scoreSheet.write('rom;fbaScore;mame2003Score;mame2010Score\n')
-    
-    rootFba = etree.Element("datafile") if fbaKey in usingSystems else None
-    rootMame2003 = etree.Element("datafile") if mame2003Key in usingSystems else None
-    rootMame2010 = etree.Element("datafile") if mame2010Key in usingSystems else None
-    rootFba.append(dats[fbaKey+"Header"]) if fbaKey in usingSystems else None
-    rootMame2003.append(dats[mame2003Key+"Header"]) if mame2003Key in usingSystems else None
-    rootMame2010.append(dats[mame2010Key+"Header"]) if mame2010Key in usingSystems else None
-       
+    print("Creating or cleaning output directory %s" %configuration['exportDir'])
+    if os.path.exists(configuration['exportDir']) :
+        for file in os.listdir(os.path.join(configuration['exportDir'])) :
+            fullPath = os.path.join(configuration['exportDir'],file)        
+            shutil.rmtree(fullPath) if os.path.isdir(fullPath) else os.remove(fullPath)
+    else :
+        os.makedirs(configuration['exportDir'])
+        
     notInAnySet = []
     onlyInOneSet = dict()
     useGenreSubFolder = True if configuration['genreSubFolders'] == '1' else False
     keepNotTested = True if configuration['keepNotTested'] == '1' else False
     keepLevel = int(configuration['keepLevel'])    
     
-    os.makedirs(os.path.join(configuration['exportDir'],fbaKey)) if fbaKey in usingSystems else None
-    os.makedirs(os.path.join(configuration['exportDir'],mame2003Key)) if mame2003Key in usingSystems else None
-    os.makedirs(os.path.join(configuration['exportDir'],mame2010Key)) if mame2010Key in usingSystems else None
-    fbaGamelist = gamelist.init(os.path.join(configuration['exportDir'],fbaKey)) if fbaKey in usingSystems else None
-    mame2003Gamelist = gamelist.init(os.path.join(configuration['exportDir'],mame2003Key)) if mame2003Key in usingSystems else None
-    mame2010Gamelist = gamelist.init(os.path.join(configuration['exportDir'],mame2010Key)) if mame2010Key in usingSystems else None
+    scoreSheet = open(os.path.join(configuration['exportDir'],"scoreSheet.csv"),"w",encoding="utf-8")
+    scoreSheet.write('rom;fbaScore;mame2003Score;mame2010Score\n')
     
+    CSVs, gamelists, roots = dict(), dict(), dict()
+    header="Status;Genre;Name (mame description);Rom name;Year;Manufacturer;Hardware;Comments;Notes\n"
+    for setKey in usingSystems :
+        # init CSVS
+        CSVs[setKey] = open(os.path.join(configuration['exportDir'],setKey+".csv"),"w",encoding="utf-8")
+        CSVs[setKey].write(header)
+        # init gamelists
+        roots[setKey] = etree.Element("datafile")
+        roots[setKey].append(dats[setKey+"Header"])   
+        os.makedirs(os.path.join(configuration['exportDir'],setKey))
+        gamelists[setKey] = gamelist.init(os.path.join(configuration['exportDir'],setKey))
     
     for genre in setDict.keys() :
         print("Handling genre %s" %genre)
         
         if useGenreSubFolder :
-            os.makedirs(os.path.join(configuration['exportDir'],fbaKey,genre)) if fbaKey in usingSystems else None
-            os.makedirs(os.path.join(configuration['exportDir'],mame2003Key,genre)) if mame2003Key in usingSystems else None
-            os.makedirs(os.path.join(configuration['exportDir'],mame2010Key,genre)) if mame2010Key in usingSystems else None        
-        
+            for setKey in usingSystems :
+                os.makedirs(os.path.join(configuration['exportDir'],setKey,genre))
+            
         # copy bios in each subdirectory
-        for bios in bioses :            
-            fbaBios = os.path.join(configuration['fbaSet'],bios+".zip") if fbaKey in usingSystems else None
-            mame2003Bios = os.path.join(configuration['mame2003Set'],bios+".zip") if mame2003Key in usingSystems else None
-            mame2010Bios = os.path.join(configuration['mame2010Set'],bios+".zip") if mame2010Key in usingSystems else None            
-            setFileCopy(fbaBios,genre,bios,fbaKey,useGenreSubFolder) if fbaKey in usingSystems else None
-            writeGamelistHiddenEntry(fbaGamelist,bios,genre,useGenreSubFolder) if fbaKey in usingSystems else None
-            setFileCopy(mame2003Bios,genre,bios,mame2003Key,useGenreSubFolder) if mame2003Key in usingSystems else None
-            writeGamelistHiddenEntry(mame2003Gamelist,bios,genre,useGenreSubFolder) if mame2003Key in usingSystems else None
-            setFileCopy(mame2010Bios,genre,bios,mame2010Key,useGenreSubFolder) if mame2010Key in usingSystems else None
-            writeGamelistHiddenEntry(mame2010Gamelist,bios,genre,useGenreSubFolder) if mame2010Key in usingSystems else None
+        for bios in bioses :
+            for setKey in usingSystems :
+                setBios = os.path.join(configuration[setKey],bios+".zip")
+                setFileCopy(setBios,genre,bios,setKey,useGenreSubFolder)
+                writeGamelistHiddenEntry(gamelists[setKey],bios,genre,useGenreSubFolder)
         
         for game in sorted(setDict[genre]) :
-            audit = game +" -> "
-            
+            audit = game +" -> "            
             scores = dict()
             testForGame = allTests[game] if game in allTests else None
-            scores[fbaKey] = computeScore(fbaKey,configuration['fbaSet'],game,testForGame) if fbaKey in usingSystems else -2
-            scores[mame2003Key] = computeScore(mame2003Key,configuration['mame2003Set'],game,testForGame) if mame2003Key in usingSystems else -2
-            scores[mame2010Key] = computeScore(mame2010Key,configuration['mame2010Set'],game,testForGame) if mame2010Key in usingSystems else -2                 
+            
+            for setKey in setKeys :    
+                scores[setKey] = computeScore(setKey,configuration[setKey],game,testForGame) if setKey in usingSystems else -2               
             
             audit = audit + " SCORES: "+ str(scores[fbaKey]) + " " + str(scores[mame2003Key]) + " " + str(scores[mame2010Key]) + " ,"                                    
             scoreSheet.write('%s;%i;%i;%i\n' %(game,scores[fbaKey], scores[mame2003Key], scores[mame2010Key]))
             
             selected = []
-            keepSet(keepNotTested,configuration['exclusionType'],keepLevel,scores,fbaKey,selected)  if fbaKey in usingSystems else None           
-            keepSet(keepNotTested,configuration['exclusionType'],keepLevel,scores,mame2010Key,selected) if mame2010Key in usingSystems else None
-            keepSet(keepNotTested,configuration['exclusionType'],keepLevel,scores,mame2003Key,selected) if mame2003Key in usingSystems else None
+            for setKey in usingSystems :
+                selected.append(setKey) if keepSet(keepNotTested,configuration['exclusionType'],keepLevel,scores,setKey,selected) else None
             
             audit = audit + " SELECTED: "+ str(selected)
             
-            fbaRom = os.path.join(configuration['fbaSet'],game+".zip") if fbaKey in usingSystems else None
-            mame2003Rom = os.path.join(configuration['mame2003Set'],game+".zip") if mame2003Key in usingSystems else None
-            mame2010Rom = os.path.join(configuration['mame2010Set'],game+".zip") if mame2010Key in usingSystems else None
+            for setKey in usingSystems :
+                setRom = os.path.join(configuration[setKey],game+".zip")
+                if setKey in selected :
+                    setFileCopy(setRom,genre,game,setKey,useGenreSubFolder)                
+                    writeCSV(CSVs[setKey],game,scores[setKey],genre,dats[setKey],testForGame,setKey)
+                    writeGamelistEntry(gamelists[setKey],game,dats[setKey],genre,useGenreSubFolder,testForGame,setKey)
+                    roots[setKey].append(dats[setKey][game].node) if game in dats[setKey] else None              
             
-            if fbaKey in selected and fbaKey in usingSystems :
-                setFileCopy(fbaRom,genre,game,fbaKey,useGenreSubFolder)                
-                writeCSV(fbaCSV,game,scores[fbaKey],genre,dats[fbaKey],testForGame,fbaKey)
-                writeGamelistEntry(fbaGamelist,game,dats[fbaKey],genre,useGenreSubFolder,testForGame,fbaKey)
-                rootFba.append(dats[fbaKey][game].node) if game in dats[fbaKey] else None              
-            if mame2003Key in selected and mame2003Key in usingSystems :    
-                setFileCopy(mame2003Rom,genre,game,mame2003Key,useGenreSubFolder)
-                writeCSV(mame2003CSV,game,scores[mame2003Key],genre,dats[mame2003Key],testForGame,mame2003Key)
-                writeGamelistEntry(mame2003Gamelist,game,dats[mame2003Key],genre,useGenreSubFolder,testForGame,mame2003Key)
-                rootMame2003.append(dats[mame2003Key][game].node) if game in dats[mame2003Key] else None
-            if mame2010Key in selected and mame2010Key in usingSystems :
-                setFileCopy(mame2010Rom,genre,game,mame2010Key,useGenreSubFolder)
-                writeCSV(mame2010CSV,game,scores[mame2010Key],genre,dats[mame2010Key],testForGame,mame2010Key)
-                writeGamelistEntry(mame2010Gamelist,game,dats[mame2010Key],genre,useGenreSubFolder,testForGame,mame2010Key)
-                rootMame2010.append(dats[mame2010Key][game].node) if game in dats[mame2010Key] else None
-         
             if len(selected) == 0 :                
                 notInAnySet.append(game)
             elif len(selected) == 1 :
@@ -231,19 +210,13 @@ def createSets(allTests,dats) :
             
             print("    %s" %audit)
     
-    treeFba = etree.ElementTree(rootFba) if fbaKey in usingSystems else None
-    treeFba.write(os.path.join(configuration['exportDir'],fbaKey+".dat"), xml_declaration=True, encoding="utf-8") if fbaKey in usingSystems else None
-    treeMame2003 = etree.ElementTree(rootMame2003) if mame2003Key in usingSystems else None
-    treeMame2003.write(os.path.join(configuration['exportDir'],mame2003Key+".dat"), xml_declaration=True, encoding="utf-8") if mame2003Key in usingSystems else None
-    treeMame2010 = etree.ElementTree(rootMame2010) if mame2010Key in usingSystems else None
-    treeMame2010.write(os.path.join(configuration['exportDir'],mame2010Key+".dat"), xml_declaration=True, encoding="utf-8") if mame2010Key in usingSystems else None
-       
-    fbaCSV.close() if fbaKey in usingSystems else None
-    gamelist.close(fbaGamelist) if fbaKey in usingSystems else None
-    mame2003CSV.close() if mame2003Key in usingSystems else None
-    gamelist.close(mame2003Gamelist) if mame2003Key in usingSystems else None
-    mame2010CSV.close() if mame2010Key in usingSystems else None
-    gamelist.close(mame2010Gamelist) if mame2010Key in usingSystems else None
+    # writing and closing everything
+    for setKey in usingSystems :
+        treeSet = etree.ElementTree(roots[setKey])
+        treeSet.write(os.path.join(configuration['exportDir'],setKey+".dat"), xml_declaration=True, encoding="utf-8")
+        CSVs[setKey].close()
+        gamelist.close(gamelists[setKey])    
+    
     scoreSheet.close()
         
     print ("\n<------------------ RESULTS ------------------>")
@@ -257,9 +230,9 @@ def writeSets() :
     
 def checkErrors(inputTests,keepLevel) :        
     print("Input Tests")
-    test.loadTests(fbaKey,mame2003Key,mame2010Key,os.path.join(scriptDir,dataDir),usingSystems)
+    test.loadTests(setKeys,os.path.join(scriptDir,dataDir),usingSystems)
     print("Output Tests")
-    outputTests = test.loadTests(fbaKey,mame2003Key,mame2010Key,os.path.join(configuration['exportDir']),usingSystems)
+    outputTests = test.loadTests(setKeys,os.path.join(configuration['exportDir']),usingSystems)
     print("Possible errors")
     for rom in inputTests.keys() :
         
@@ -294,9 +267,9 @@ def printDict(dictList) :
         
 def useSystems(configuration) :
     systems = []
-    systems.append(fbaKey) if os.path.exists(configuration['fbaSet']) else None
-    systems.append(mame2003Key) if os.path.exists(configuration['mame2003Set']) else None
-    systems.append(mame2010Key) if os.path.exists(configuration['mame2010Set']) else None
+    for setKey in setKeys :
+        systems.append(setKey) if os.path.exists(configuration[setKey]) else None
+        
     print('Using systems',systems)
     return systems
     
@@ -314,10 +287,10 @@ if __name__ == "__main__":
     fav.loadFavs(scriptDir,bioses,setDict)
     # parse dat files
     print('\n<--------- Load FBA & Mame Dats --------->')
-    dats = dat.parseDats(scriptDir,dataDir,[fbaKey,mame2003Key,mame2010Key],['FBAlphav0.2.97.43.dat','mame2003.dat','mame2010.dat'],usingSystems)
+    dats = dat.parseDats(scriptDir,dataDir,datsDict,usingSystems)
     # parse test files
     print('\n<--------- Load Tests Files --------->')
-    allTests = test.loadTests(fbaKey,mame2003Key,mame2010Key,os.path.join(scriptDir,dataDir),usingSystems)
+    allTests = test.loadTests(setKeys,os.path.join(scriptDir,dataDir),usingSystems)
     # create bestarcade romsets
     print('\n<--------- Create Sets --------->')    
     createSets(allTests,dats)
@@ -327,3 +300,7 @@ if __name__ == "__main__":
 
 # TODOS
 # missing doctype on generated dat  ?
+# also remove brackets content from name in game description
+# remove brackets in genre generated for csv
+# make required modifications
+# generate new release

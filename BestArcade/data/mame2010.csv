@@ -312,6 +312,7 @@ Status;Genre;Name (mame description);Rom name;Year;Manufacturer;Hardware;Comment
 3;Misc;Fly-Boy;flyboy;1982;Kaneko;;;
 1;Misc;Food Fight (rev 3);foodf;1982;General Computer Corporation (Atari license);;bad controls;enter mame menu to start game
 0;Misc;Free Kick;freekick;1987;Nihon System (Sega license);;doesn't appear in list ??;
+3;Misc;Freeze;freeze;1984;Cinematronics;;;
 1;Misc;Ghox (spinner);ghox;1991;Toaplan;;no sound;
 0;Misc;Gigas (MC-8123, 317-5002);gigas;1986;Sega;;doesn't launch;
 1;Misc;Go Go! Mile Smile;gogomile;1995;Fuuki;;lags a lot;
@@ -962,6 +963,7 @@ Status;Genre;Name (mame description);Rom name;Year;Manufacturer;Hardware;Comment
 3;ShootEmUp;Cosmo Gang the Video (US);cosmogng;1991;Namco;;UNPLAYABLE BEFORE;
 3;ShootEmUp;Cotton (set 3, World, FD1094 317-0181a);cotton;1991;Sega / Success;;NEW ON MAME;
 0;ShootEmUp;Cotton 2 (JUET 970902 V1.000);cotton2;1997;Success;;;no CHD
+1;ShootEmUp;Cotton Boomerang (JUET 980709 V1.000);cottonbm;1998;Success;;lags a lot;
 1;ShootEmUp;Crater Raider;crater;1984;Bally Midway;;tilted sideways, partial controls;
 3;ShootEmUp;Cybattler;cybattlr;1993;Jaleco;;NEW ON MAME;
 0;ShootEmUp;Cyber Commando (Rev. CY1, Japan);cybrcomm;1994;Namco;;freezes recalbox;no CHD
@@ -1015,6 +1017,7 @@ Status;Genre;Name (mame description);Rom name;Year;Manufacturer;Hardware;Comment
 3;ShootEmUp;Flying Tiger (set 1);flytiger;1992;Dooyong;;;
 2;ShootEmUp;Forgotten Worlds (World);forgottn;1988;Capcom;;partialy missing controls;
 1;ShootEmUp;Fortress 2 Blue Arcade (ver 1.01 / pcb ver 3.05);fort2b;2001;Eolith;;no sound;
+2;ShootEmUp;Future Spy (315-5061);futspy;1984;Sega;;no sound;
 1;ShootEmUp;G-Darius Ver.2 (Ver 2.03J);gdarius2;1997;Taito;;lags a lot;
 1;ShootEmUp;G-LOC Air Battle (US);gloc;1990;Sega;;lags a lot;
 1;ShootEmUp;G-Stream G2020;gstream;2002;Oriental Soft Japan;;lags a lot;
@@ -1461,6 +1464,7 @@ Status;Genre;Name (mame description);Rom name;Year;Manufacturer;Hardware;Comment
 3;Sport;Street Hoop / Street Slam / Dunk Dream;strhoop;1994;Data East Corporation;;NEW ON MAME;
 3;Sport;Strike Zone Baseball;strkzone;1988;Leland Corporation;;;
 3;Sport;Super Baseball Double Play Home Run Derby;dblplay;1987;Leland Corporation / Tradewest;;;
+3;Sport;Super Dodge Ball (US);spdodgeb;1987;Technos Japan;;;
 3;Sport;Super Dodge Ball / Kunio no Nekketsu Toukyuu Densetsu;sdodgeb;1996;Technos Japan;;;
 3;Sport;Super Doubles Tennis;sdtennis;1983;Data East Corporation;;;
 1;Sport;Super Eagle Shot;speglsht;1994;Seta;;lags a lot, graphic bugs;
@@ -1668,6 +1672,9 @@ Status;Genre;Name (mame description);Rom name;Year;Manufacturer;Hardware;Comment
 1;VsFighting;Street Fighter EX Plus (USA 970407);sfexp;1997;Capcom / Arika;;lags a lot;
 3;VsFighting;Street Fighter II: The World Warrior (World 910522);sf2;1991;Capcom;;;
 3;VsFighting;Street Fighter II': Hyper Fighting (World 921209);sf2hf;1992;Capcom;;;
+0;VsFighting;Street Fighter III 2nd Impact: Giant Attack (USA, 970930);sfiii2;1997;Capcom;;crashes on launch;
+0;VsFighting;Street Fighter III 3rd Strike: Fight for the Future (USA, 990608);sfiii3;1999;Capcom;;crashes on launch;
+0;VsFighting;Street Fighter III: New Generation (USA, 970204);sfiii;1997;Capcom;;crashes on launch;
 1;VsFighting;Street Fighter: The Movie (v1.12);sftm;1995;Capcom / Incredible Technologies;;lags a lot;
 3;VsFighting;Street Smart (US version 2);streetsm;1989;SNK;;;
 3;VsFighting;Success Joe (World);scessjoe;1990;Wave / Taito Corporation;;NEW ON MAME;

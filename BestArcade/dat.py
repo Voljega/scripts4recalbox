@@ -23,14 +23,11 @@ def parseDat(file):
     print('Dat %s : %i entries' %(file,len(dats)))
     return dats
 
-def parseDats(scriptDir,dataDir,keys,files,usingSystems) :
-    dats = dict()
-    i = 0
-    for file in files :
-        if keys[i] in usingSystems :
-            header = etree.parse(os.path.join(scriptDir,dataDir,file),etree.XMLParser(encoding="utf-8")).findall(".//header")
-            dats[keys[i]] = parseDat(os.path.join(scriptDir,dataDir,file))
-            dats[keys[i]+"Header"] = header[0]
-        i = i+1
+def parseDats(scriptDir,dataDir,setDats,usingSystems) :
+    dats = dict()    
+    for setKey in usingSystems :        
+        header = etree.parse(os.path.join(scriptDir,dataDir,setDats[setKey]),etree.XMLParser(encoding="utf-8")).findall(".//header")
+        dats[setKey] = parseDat(os.path.join(scriptDir,dataDir,setDats[setKey]))
+        dats[setKey+"Header"] = header[0]        
     return dats
   
