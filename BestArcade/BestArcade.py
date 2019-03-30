@@ -45,9 +45,12 @@ def computeScore(setKey,setDir,game,test) :
     
     return score
 
-def keepSet(keepNotTested,exclusionType,keepLevel,scores,key,keep) :
+def isPreferedSetForGenre(configuration,genre,keySet) :        
+    return configuration[genre+'PreferedSet'] == keySet
+
+def keepSet(keepNotTested,usePreferedSetForGenre,exclusionType,keepLevel,scores,key,genre,keep) :        
     maxScore = max(scores.values())
-    if keepNotTested and scores[key] == -1 :
+    if keepNotTested and scores[key] == -1 :        
         return True
     elif exclusionType == 'NONE' :
         return scores[key] >= keepLevel
@@ -55,10 +58,17 @@ def keepSet(keepNotTested,exclusionType,keepLevel,scores,key,keep) :
         if scores[key] == maxScore :
             return scores[key] >= keepLevel
     elif exclusionType == 'STRICT' :
-        if scores[key] == maxScore :
-            if fbaKey not in keep and mame2010Key not in keep: # necessary while mame2003 is not fully tested
+        genreTest = genre.replace('[','')
+        genreTest = genreTest.replace(']','')
+        if usePreferedSetForGenre and configuration[genreTest+'PreferedSet'] : # check not empty
+            if isPreferedSetForGenre(configuration,genreTest,key):
                 return scores[key] >= keepLevel
-            elif key == configuration['preferedSet'] :
+            else :
+                return False
+        if scores[key] == maxScore :
+            if key == configuration['preferedSet'] :                
+                return scores[key] >= keepLevel
+            elif fbaKey not in keep and mame2010Key not in keep:  # check not already in keep
                 return scores[key] >= keepLevel
                 
 def writeCSV(csvFile,game,score,genre,dat,test,setKey) :
@@ -76,10 +86,10 @@ def writeCSV(csvFile,game,score,genre,dat,test,setKey) :
     else :
         hardware,comments,notes = '','',''
     
-    genre = genre.replace('[','')
-    genre = genre.replace(']','')    
+    genreExport = genre.replace('[','')
+    genreExport = genreExport.replace(']','')    
     csvFile.write("%i;%s;%s;%s;%s;%s;%s;%s;%s\n" 
-                  %(score,genre,name,game,year,manufacturer,hardware,comments,notes))
+                  %(score,genreExport,name,game,year,manufacturer,hardware,comments,notes))
 
 def getStatus(status) :
     if status == -1 :
@@ -150,7 +160,8 @@ def createSets(allTests,dats) :
     onlyInOneSet = dict()
     useGenreSubFolder = True if configuration['genreSubFolders'] == '1' else False
     keepNotTested = True if configuration['keepNotTested'] == '1' else False
-    keepLevel = int(configuration['keepLevel'])    
+    keepLevel = int(configuration['keepLevel'])
+    usePreferedSetForGenre = True if configuration['usePreferedSetForGenre'] == '1' else False    
     
     scoreSheet = open(os.path.join(configuration['exportDir'],"scoreSheet.csv"),"w",encoding="utf-8")
     scoreSheet.write('rom;fbaScore;mame2003Score;mame2010Score\n')
@@ -187,14 +198,16 @@ def createSets(allTests,dats) :
             testForGame = allTests[game] if game in allTests else None
             
             for setKey in setKeys :    
-                scores[setKey] = computeScore(setKey,configuration[setKey],game,testForGame) if setKey in usingSystems else -2               
+                scores[setKey] = computeScore(setKey,configuration[setKey],game,testForGame) if setKey in usingSystems else -2                
+            
+#            printDict(scores) if game == 'jdredd' else None
             
             audit = audit + " SCORES: "+ str(scores[fbaKey]) + " " + str(scores[mame2003Key]) + " " + str(scores[mame2010Key]) + " ,"                                    
             scoreSheet.write('%s;%i;%i;%i\n' %(game,scores[fbaKey], scores[mame2003Key], scores[mame2010Key]))
             
             selected = []
             for setKey in usingSystems :
-                selected.append(setKey) if keepSet(keepNotTested,configuration['exclusionType'],keepLevel,scores,setKey,selected) else None
+                selected.append(setKey) if keepSet(keepNotTested,usePreferedSetForGenre,configuration['exclusionType'],keepLevel,scores,setKey,genre,selected) else None
             
             audit = audit + " SELECTED: "+ str(selected)
             
@@ -229,9 +242,6 @@ def createSets(allTests,dats) :
     print(notInAnySet)
     print("ONLY IN ONE SET :")
     printDict(onlyInOneSet)          
-    
-def writeSets() :
-    print("Write Sets")
     
 def checkErrors(inputTests,keepLevel) :        
     print("Input Tests")
