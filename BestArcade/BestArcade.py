@@ -16,26 +16,27 @@ fbaKey = "fba_libretro"
 mame2010Key = "mame2010"
 mame2003Key = "mame2003"
 setKeys = [fbaKey,mame2003Key,mame2010Key]
-datsDict = dict(zip(setKeys,['FBAlphav0.2.97.43.dat','mame2003.dat','mame2010.dat']))
+datsDict = dict(zip(setKeys,['FBAlphav0.2.97.44-temp.dat','mame2003.dat','mame2010.dat']))
 
 extension = ".zip"
 
 bioses = ['acpsx','atarisy1','cpzn1','cpzn2','cvs2gd','cvsgd','decocass','konamigv','konamigx','megaplay',
         'megatech','neogeo','nss','pgm','playch10','skns','stvbios','taitofx1','taitogn','taitotz','tps',
         'atarisy1','coh1000t','hng64','crysbios','coh1000a','coh1002e','coh1001l','coh1002m','coh1000t',
-        'sys573','sys246','sys256','chihiro','naomi','naomigd','ar_bios','aleck64']
+        'sys573','sys246','sys256','chihiro','naomi','naomigd','ar_bios','aleck64','neocdz','isgsm',
+        'midssio','nmk004','ym2608']
 
 setDict = dict()
 configuration = dict()
 usingSystems = []
 
-def setFileCopy(romsetFile,genre,fileName,targetDir,useGenreSubFolder) :
-#    print('mockCopyFile',romsetFile)
-    if os.path.exists(romsetFile) :
-        if useGenreSubFolder :
-            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,genre,fileName+".zip"))
-        else :
-            shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,fileName+".zip"))
+def setFileCopy(romsetFile,genre,fileName,targetDir,useGenreSubFolder,dryRun) :
+    if not dryRun :         
+        if os.path.exists(romsetFile) :
+            if useGenreSubFolder :
+                shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,genre,fileName+".zip"))
+            else :
+                shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,fileName+".zip"))
 
 def computeScore(setKey,setDir,game,test) :
     score = test[setKey].status if (test is not None and setKey in test) else -2
@@ -158,6 +159,7 @@ def createSets(allTests,dats) :
         
     notInAnySet = []
     onlyInOneSet = dict()
+    dryRun = True if configuration['dryRun'] == '1' else False
     useGenreSubFolder = True if configuration['genreSubFolders'] == '1' else False
     keepNotTested = True if configuration['keepNotTested'] == '1' else False
     keepLevel = int(configuration['keepLevel'])
@@ -189,7 +191,7 @@ def createSets(allTests,dats) :
         for bios in bioses :
             for setKey in usingSystems :
                 setBios = os.path.join(configuration[setKey],bios+".zip")
-                setFileCopy(setBios,genre,bios,setKey,useGenreSubFolder)
+                setFileCopy(setBios,genre,bios,setKey,useGenreSubFolder,dryRun)
                 writeGamelistHiddenEntry(gamelists[setKey],bios,genre,useGenreSubFolder)
         
         for game in sorted(setDict[genre]) :
@@ -214,7 +216,7 @@ def createSets(allTests,dats) :
             for setKey in usingSystems :
                 setRom = os.path.join(configuration[setKey],game+".zip")
                 if setKey in selected :
-                    setFileCopy(setRom,genre,game,setKey,useGenreSubFolder)                
+                    setFileCopy(setRom,genre,game,setKey,useGenreSubFolder,dryRun)                
                     writeCSV(CSVs[setKey],game,scores[setKey],genre,dats[setKey],testForGame,setKey)
                     writeGamelistEntry(gamelists[setKey],game,dats[setKey],genre,useGenreSubFolder,testForGame,setKey)
                     roots[setKey].append(dats[setKey][game].node) if game in dats[setKey] else None              
@@ -316,4 +318,5 @@ if __name__ == "__main__":
 
 # TODOS
 # missing doctype on generated dat  ?
-# generate new release
+# if name from dat is empty, take one from test file
+# allow copying of images from a flyer/etc dir

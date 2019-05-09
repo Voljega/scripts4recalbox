@@ -2,7 +2,7 @@
 
 Use this tool to generate sorted romsets keeping only the games referenced in the [BestArcade4Recalbox list](https://docs.google.com/spreadsheets/d/1F5tBguhRxpj1AQcnDWF6AVSx4av_Gm3cDQedQB7IECk/edit?usp=sharing), above and equal to the working state level you choose.
 
-FBA_Libretro version currently handled is 0.2.97.43
+FBA_Libretro version currently handled is 0.2.97.44 (temp version)
 
 ### WHAT THIS TOOL DOESN'T DO :
 - It's not clrmamepro and will not check that your romsets are in the right version number
@@ -21,6 +21,7 @@ FBA_Libretro version currently handled is 0.2.97.43
 First modify the `conf.conf` file with your own parameters :
 - `exportDir` : the target directory for generation, warning its whole content will be erased (you will be prompted) at the begining of the script
 - `fba_libretro`, `mame2003`, `mame2010` : the path to your original sets, this will be left untouched by the script
+- `dryRun` : If put to 1, will do a dry run, generating only csv and dat files without copying roms and bios, good for testing
 - `keepLevel`: the working state level at which you will keep the roms in the generated romset (i.e keepLevel 2 will keep only MOSTLY_WORKING and WORKING roms)
 - `keepNotTested`: determines if untested roms will be kept or not, even in STRICT mode
 - `exclusionType`: determines how roms will be kept (based on their working state level) if you use several romsets
