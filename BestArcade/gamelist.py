@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os.path
 
-def init(outputDir):
+def initWrite(outputDir):
     gamelist = open(os.path.join(outputDir,"gamelist.xml"),'w',encoding="utf-8")
     gamelist.write('<?xml version="1.0"?>\n')
     gamelist.write("<gameList>\n")
@@ -27,7 +27,15 @@ def writeGamelistEntry(gamelist,romName,name,desc,year,frontPic,developer,publis
     gamelist.write("        <genre>"+genre+"</genre>\n")
     gamelist.write("    </game>\n")
     
-def close(gamelist) :
+def writeGamelistFolder(gamelist,name,image):
+    gamelist.write("    <folder>\n")
+    gamelist.write("        <path>./"+name+"</path>\n")
+    gamelist.write("        <name>"+name+"</name>\n")
+    gamelist.write("        <image>./downloaded_images/"+name+".png</image>\n")
+    gamelist.write("    </folder>\n")
+
+    
+def closeWrite(gamelist) :
     gamelist.write("</gameList>\n")
     gamelist.close()
     

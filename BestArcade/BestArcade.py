@@ -11,6 +11,7 @@ scriptDir = r""
 dataDir = r"data"
 outputDir = r"output"
 confFile = r"conf.conf"
+scriptDir=r""
 
 fbaKey = "fba_libretro"
 mame2010Key = "mame2010"
@@ -37,6 +38,14 @@ def setFileCopy(romsetFile,genre,fileName,targetDir,useGenreSubFolder,dryRun) :
                 shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,genre,fileName+".zip"))
             else :
                 shutil.copy2(romsetFile, os.path.join(configuration['exportDir'],targetDir,fileName+".zip"))
+
+def setImageCopy(paths,fileName,targetDir,dryRun) :
+    if not dryRun :
+        for path in paths.split(';') :
+            filePath = os.path.join(path.strip(),fileName)            
+            if os.path.exists(filePath):
+                shutil.copy2(filePath, os.path.join(configuration['exportDir'],targetDir,'downloaded_images',fileName))
+                return
 
 def computeScore(setKey,setDir,game,test) :
     score = test[setKey].status if (test is not None and setKey in test) else -2
@@ -109,8 +118,8 @@ def getStatus(status) :
 def writeGamelistHiddenEntry(gamelistFile,game,genre,useGenreSubFolder) :
     gamelist.writeGamelistHiddenEntry(gamelistFile,game+".zip",genre,useGenreSubFolder)
     
-def writeGamelistEntry(gamelistFile,game,dat,genre,useGenreSubFolder,test,setKey):
-    frontPic = "./downloaded_images/"+game+".png"
+def writeGamelistEntry(gamelistFile,game,image,dat,genre,useGenreSubFolder,test,setKey):
+    frontPic = "./downloaded_images/"+image
     
     if game in dat :
         fullName = dat[game].description
@@ -163,7 +172,8 @@ def createSets(allTests,dats) :
     useGenreSubFolder = True if configuration['genreSubFolders'] == '1' else False
     keepNotTested = True if configuration['keepNotTested'] == '1' else False
     keepLevel = int(configuration['keepLevel'])
-    usePreferedSetForGenre = True if configuration['usePreferedSetForGenre'] == '1' else False    
+    usePreferedSetForGenre = True if configuration['usePreferedSetForGenre'] == '1' else False
+    scrapeImages = True if configuration['useImages'] == '1' and configuration['images'] else False
     
     scoreSheet = open(os.path.join(configuration['exportDir'],"scoreSheet.csv"),"w",encoding="utf-8")
     scoreSheet.write('rom;fbaScore;mame2003Score;mame2010Score\n')
@@ -178,7 +188,8 @@ def createSets(allTests,dats) :
         roots[setKey] = etree.Element("datafile")
         roots[setKey].append(dats[setKey+"Header"])   
         os.makedirs(os.path.join(configuration['exportDir'],setKey))
-        gamelists[setKey] = gamelist.init(os.path.join(configuration['exportDir'],setKey))
+        os.makedirs(os.path.join(configuration['exportDir'],setKey,'downloaded_images')) if scrapeImages else None        
+        gamelists[setKey] = gamelist.initWrite(os.path.join(configuration['exportDir'],setKey))
     
     for genre in setDict.keys() :
         print("Handling genre %s" %genre)
@@ -186,6 +197,9 @@ def createSets(allTests,dats) :
         if useGenreSubFolder :
             for setKey in usingSystems :
                 os.makedirs(os.path.join(configuration['exportDir'],setKey,genre))
+                if scrapeImages :
+                    gamelist.writeGamelistFolder(gamelists[setKey],genre,genre+'.png')
+                    setImageCopy(os.path.join(scriptDir,'data','images'),genre+'.png',setKey,dryRun)
             
         # copy bios in each subdirectory
         for bios in bioses :
@@ -202,8 +216,6 @@ def createSets(allTests,dats) :
             for setKey in setKeys :    
                 scores[setKey] = computeScore(setKey,configuration[setKey],game,testForGame) if setKey in usingSystems else -2                
             
-#            printDict(scores) if game == 'jdredd' else None
-            
             audit = audit + " SCORES: "+ str(scores[fbaKey]) + " " + str(scores[mame2003Key]) + " " + str(scores[mame2010Key]) + " ,"                                    
             scoreSheet.write('%s;%i;%i;%i\n' %(game,scores[fbaKey], scores[mame2003Key], scores[mame2010Key]))
             
@@ -215,11 +227,14 @@ def createSets(allTests,dats) :
             
             for setKey in usingSystems :
                 setRom = os.path.join(configuration[setKey],game+".zip")
+                image = configuration['imgNameFormat'].replace('{rom}',game)
                 if setKey in selected :
                     setFileCopy(setRom,genre,game,setKey,useGenreSubFolder,dryRun)                
                     writeCSV(CSVs[setKey],game,scores[setKey],genre,dats[setKey],testForGame,setKey)
-                    writeGamelistEntry(gamelists[setKey],game,dats[setKey],genre,useGenreSubFolder,testForGame,setKey)
-                    roots[setKey].append(dats[setKey][game].node) if game in dats[setKey] else None              
+                    writeGamelistEntry(gamelists[setKey],game,image,dats[setKey],genre,useGenreSubFolder,testForGame,setKey)
+                    roots[setKey].append(dats[setKey][game].node) if game in dats[setKey] else None
+                    if scrapeImages :                          
+                        setImageCopy(configuration['images'],image,setKey,dryRun)
             
             if len(selected) == 0 :                
                 notInAnySet.append(game)
@@ -235,7 +250,7 @@ def createSets(allTests,dats) :
         treeSet = etree.ElementTree(roots[setKey])
         treeSet.write(os.path.join(configuration['exportDir'],setKey+".dat"), xml_declaration=True, encoding="utf-8")
         CSVs[setKey].close()
-        gamelist.close(gamelists[setKey])    
+        gamelist.closeWrite(gamelists[setKey])    
     
     scoreSheet.close()
         
@@ -319,4 +334,3 @@ if __name__ == "__main__":
 # TODOS
 # missing doctype on generated dat  ?
 # if name from dat is empty, take one from test file
-# allow copying of images from a flyer/etc dir
