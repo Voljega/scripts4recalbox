@@ -7,13 +7,12 @@ FBA_Libretro version currently handled is 0.2.97.44 (temp version)
 ### WHAT THIS TOOL DOESN'T DO :
 - It's not clrmamepro and will not check that your romsets are in the right version number
 - It only works with non-merged sets, split and merged sets are not supported, use clrmamepro to generate non-merged sets if needed
-- It's not a scrapper per se, it will generate gamelists though, so be aware to remove them if you don't want to use them
 - It doesn't handle CHD
 - It only works on Windows
 
 ### WHAT THIS TOOL DO :
 - Generate BestArcade romsets by using your fba_libretro, mame2003 and mame2010 non-merged sets, your original sets will be kept intact
-- Generate full gamelist for your sets, with optional images. Genre images were generated with the awesome site [Game-icons.net](https://game-icons.net/)
+- Generate basic gamelist for your sets, with optional images. Genre images were generated with the awesome site [Game-icons.net](https://game-icons.net/)
 - Generate csv files documenting the generated sets
 - Generate a scoresheet comparing working level in generated sets
 - Generate dat files for the generated romsets
