@@ -7,6 +7,10 @@ def initWrite(outputDir):
     gamelist.write("<gameList>\n")
     return gamelist
 
+def initRead(outputDir):
+    gamelist = open(os.path.join(outputDir,"gamelist.xml"),'r',encoding="utf-8")
+    return gamelist
+
 def writeGamelistHiddenEntry(gamelist,romName,genre,useGenreFolder) :
     romPath = (genre + "/" + romName) if useGenreFolder else romName
     gamelist.write("    <game>\n")
@@ -33,9 +37,10 @@ def writeGamelistFolder(gamelist,name,image):
     gamelist.write("        <name>"+name+"</name>\n")
     gamelist.write("        <image>./downloaded_images/"+name+".png</image>\n")
     gamelist.write("    </folder>\n")
-
     
 def closeWrite(gamelist) :
     gamelist.write("</gameList>\n")
     gamelist.close()
     
+def closeRead(gamelist) :    
+    gamelist.close()
