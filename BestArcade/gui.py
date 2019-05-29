@@ -3,8 +3,9 @@
 
 from Tkinter import *
 import conf,ttk, collections
+from operator import attrgetter
 
-GUIString = collections.namedtuple('GUIString', 'id label help')
+GUIString = collections.namedtuple('GUIString', 'id label help order')
 
 class GUI():
 
@@ -24,10 +25,12 @@ class GUI():
     def loadStrings(self) :
         self.guiStrings = dict()
         file = open(r"/home/thomas/code/perso/scripts4recalbox/BestArcade/GUI/gui-en.csv",'r')
+        order = 0
         for line in file.readlines()[1:] :
             confLine = line.split(";")
             if len(confLine) == 3 :
-                self.guiStrings[confLine[0]]=GUIString(confLine[0],confLine[1],confLine[2].rstrip('\n\r '))
+                self.guiStrings[confLine[0]]=GUIString(confLine[0],confLine[1],confLine[2].rstrip('\n\r '), order)
+                order = order + 1
         file.close()
         print(len(self.guiStrings))
         print(self.guiStrings['usePreferedSetForGenre'])
@@ -39,6 +42,7 @@ class GUI():
         self.drawImagesFrame()
         self.drawParametersFrame()
         self.drawButtonsFrame()
+        self.drawConsole()
         self.window.mainloop()
 
     def drawRomsetFrame(self) :
@@ -70,7 +74,7 @@ class GUI():
         self.imagesFrame.grid(column=0,row=1,sticky="EW",pady=5)
         setRow = 0
         for path in self.configuration['images'].split(';') :
-            pathLabel = self.guiStrings['images'].label+' #'+ str(setRow+1) + ' :'
+            pathLabel = self.guiStrings['images'].label+' #'+ str(setRow+1)
             label = Label(self.imagesFrame, text=pathLabel)
             label.grid(column=0, row=setRow, padx=5,sticky="W")
             self.guiVars[pathLabel] = StringVar()
@@ -308,19 +312,54 @@ class GUI():
 
     def clickSave(self) :
         print ('Save!')
-        print(self.guiStrings['confirm'].label)
-        print(self.guiVars['exportDir'].get())
-        message=self.guiStrings['confirm'].label.replace('{outputDir}',self.guiVars['exportDir'].get())
-        messagebox.askyesno(self.window,message=message,icon='question',title=self.guiStrings['confirm'].help,type=okcancel)
-
+        listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
+        for key in listKeys :
+            print(str(key.order) + "\t"+ key.id + "\t" + key.help)
 
     def clickVerify(self) :
         print ('Verify!')
 
     def clickProceed(self) :
         print ('Proceed!')
+        print(self.guiStrings['confirm'].label)
+        print(self.guiVars['exportDir'].get())
+        message=self.guiStrings['confirm'].label.replace('{outputDir}',self.guiVars['exportDir'].get())
+        messagebox.askyesno(self.window,message=message,icon='question',title=self.guiStrings['confirm'].help,type=okcancel)
+
+    def drawConsole(self) :
+        self.consoleFrame = Frame(self.root, padx=15)
+        self.consoleFrame.grid(column=0,row=4,sticky="EW",pady=10)
+        self.logTest = Text(self.consoleFrame, height=15, state='disabled', wrap='word',background='black',foreground='yellow')
+        self.logTest.grid(column=0,row=0,sticky="EW")
+        self.scrollbar = Scrollbar(self.consoleFrame, orient=VERTICAL,command=self.logTest.yview)
+        self.scrollbar.grid(column=1,row=0,sticky=(N,S))
+        self.logTest['yscrollcommand'] = self.scrollbar.set
+        for var in self.guiVars :
+            self.writeToLog(var + " : " + str(self.guiVars[var].get()))
+
+    def writeToLog(self, msg):
+        print(msg+'\n')
+        numlines = self.logTest.index('end - 1 line').split('.')[0]
+        self.logTest['state'] = 'normal'
+        if numlines==24:
+            self.logTest.delete(1.0, 2.0)
+        if self.logTest.index('end-1c')!='1.0':
+            self.logTest.insert('end', '\n')
+        self.logTest.insert('end', msg)
+        self.logTest.see(END)
+        self.logTest['state'] = 'disabled'
 
 if __name__ == "__main__":
     configuration = conf.loadConf(r"/home/thomas/code/perso/python/conf.conf")
     gui = GUI(configuration)
     gui.draw()
+
+# Change ; as separator for imagePath, use |, check imagePath in guiStrings file
+# Handle keepLevel and images path vars in/out values correctly
+# Add correct help in gui conf file
+# Save to memory and to conf file (using order)
+# Change '#n' to '\n# ' on loading of guiStrings and/or saving
+# Fully integrate logging
+# Fully integrate with sorter
+# Fix all layout shit
+# Display folders status with icon
