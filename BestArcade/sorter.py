@@ -4,6 +4,7 @@
 import xml.etree.ElementTree as etree
 import os.path, shutil
 import gamelist
+import fav, test, dat
 
 class Sorter :
     
@@ -11,6 +12,7 @@ class Sorter :
     mame2010Key = "mame2010"
     mame2003Key = "mame2003"
     setKeys = [fbaKey,mame2003Key,mame2010Key]
+    dataDir = r"data"
     
     bioses = ['acpsx','atarisy1','cpzn1','cpzn2','cvs2gd','cvsgd','decocass','konamigv','konamigx','megaplay',
         'megatech','neogeo','nss','pgm','playch10','skns','stvbios','taitofx1','taitogn','taitotz','tps',
@@ -18,11 +20,30 @@ class Sorter :
         'sys573','sys246','sys256','chihiro','naomi','naomigd','ar_bios','aleck64','neocdz','isgsm',
         'midssio','nmk004','ym2608']
     
-    def __init__(self,configuration,usingSystems,favorites,scriptDir) :
-        self.configuration = configuration
-        self.usingSystems = usingSystems
-        self.favorites = favorites
+    def __init__(self,configuration,scriptDir,logger) :
+        self.configuration = configuration               
         self.scriptDir = scriptDir
+        self.logger = logger
+        
+    def prepare(self) :
+        self.usingSystems = self.useSystems(self.configuration)
+        # create favorites containing fav games
+        self.logger.log('\n<--------- Load Favorites Ini Files --------->')
+        self.favorites = fav.loadFavs(self.scriptDir,Sorter.bioses,self.logger)
+        # parse dat files
+        self.logger.log('\n<--------- Load FBA & Mame Dats --------->')
+        datsDict = dict(zip(self.setKeys,['FBAlphav0.2.97.44-temp.dat','mame2003.dat','mame2010.dat']))
+        self.dats = dat.parseDats(self.scriptDir,self.dataDir,datsDict,self.usingSystems,self.logger)
+        # parse test files
+        self.logger.log('\n<--------- Load Tests Files --------->')        
+        self.allTests = test.loadTests(Sorter.setKeys,os.path.join(self.scriptDir,self.dataDir),self.usingSystems,self.logger)
+        
+    def useSystems(self,configuration) :
+        systems = []
+        for setKey in self.setKeys :
+            systems.append(setKey) if os.path.exists(configuration[setKey]) else None            
+        self.logger.logList('Using systems',systems)
+        return systems
     
     def setFileCopy(self,romsetFile,genre,fileName,targetDir,useGenreSubFolder,dryRun) :
         if not dryRun :         
@@ -34,7 +55,7 @@ class Sorter :
 
     def setImageCopy(self,paths,fileName,targetDir,dryRun) :
         if not dryRun :
-            for path in paths.split(';') :
+            for path in paths.split('|') :
                 filePath = os.path.join(path.strip(),fileName)            
                 if os.path.exists(filePath):
                     shutil.copy2(filePath, os.path.join(self.configuration['exportDir'],targetDir,'downloaded_images',fileName))
@@ -151,7 +172,7 @@ class Sorter :
     
     def createSets(self,allTests,dats) :
         
-        print("Creating or cleaning output directory %s" %self.configuration['exportDir'])
+        self.logger.log('Creating or cleaning output directory '+ self.configuration['exportDir'])
         if os.path.exists(self.configuration['exportDir']) :
             for file in os.listdir(os.path.join(self.configuration['exportDir'])) :
                 fullPath = os.path.join(self.configuration['exportDir'],file)        
@@ -185,7 +206,7 @@ class Sorter :
             gamelists[setKey] = gamelist.initWrite(os.path.join(self.configuration['exportDir'],setKey))
         
         for genre in self.favorites.keys() :
-            print("Handling genre %s" %genre)
+            self.logger.log("Handling genre "+ genre)
             
             if useGenreSubFolder :
                 for setKey in self.usingSystems :
@@ -236,7 +257,7 @@ class Sorter :
                         onlyInOneSet[selected[0]] = []
                     onlyInOneSet[selected[0]].append(game)
                 
-                print("    %s" %audit)
+                self.logger.log("    "+ audit)
         
         # writing and closing everything
         for setKey in self.usingSystems :
@@ -247,6 +268,6 @@ class Sorter :
         
         scoreSheet.close()
             
-        print ("\n<------------------ RESULTS ------------------>")
-        print("NOT FOUND IN ANY SET : %i" %len(notInAnySet))
-        print(notInAnySet)               
+        self.logger.log ("\n<------------------ RESULTS ------------------>")
+        self.logger.log("NOT FOUND IN ANY SET : "+ str(len(notInAnySet)))
+        self.logger.logList("",notInAnySet)               

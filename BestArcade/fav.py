@@ -22,18 +22,16 @@ def parseSetFile(setFile, favorites) :
                 
     file.close()
 
-def loadFavs(scriptDir, bioses) :    
+def loadFavs(scriptDir, bioses, logger) :    
     favorites = dict()
     parseSetFile(os.path.join(scriptDir,dataDir,smallSetFile),favorites)    
     parseSetFile(os.path.join(scriptDir,dataDir,bigSetFile),favorites)
     
-    print('Nb Genre : %s' %len(favorites))    
+    logger.log('Nb Genre : '+ str(len(favorites)))    
     sumGames = 0
-    for key in favorites.keys() :
-        # print(key)
-        # print(setDict[key])
+    for key in favorites.keys() :        
         sumGames = sumGames + len(favorites[key])
         
-    print('Nb Games : %s' %sumGames)
-    print('Nb Bios : %s' %len(bioses))
+    logger.log('Nb Games : '+ str(sumGames))
+    logger.log('Nb Bios : ' + str(len(bioses)))
     return favorites

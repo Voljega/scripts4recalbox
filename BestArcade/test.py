@@ -33,12 +33,12 @@ def loadTest(testFile,key,allTests) :
     file.close()
     return tests
 
-def loadTests(setKeys,sourceDir,usingSystems) :
+def loadTests(setKeys,sourceDir,usingSystems,logger) :
     allTests = dict()
     for setKey in setKeys :
         if setKey in usingSystems :
             setTests = loadTest(os.path.join(sourceDir,setKey+'.csv'), setKey, allTests)
-            print("    Found %i %s tests" %(len(setTests),setKey))            
+            logger.log('    Found '+str(len(setTests))+' '+setKey+' tests')            
        
-    print("    Found %i unique tests" %len(allTests))
+    logger.log('    Found '+str(len(allTests))+' unique tests')
     return allTests

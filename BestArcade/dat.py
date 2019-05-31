@@ -8,7 +8,7 @@ def get(i,e):
     ll=i.find(e)        
     return ll.text if ll != None else None
 
-def parseDat(file):
+def parseDat(file,logger):
     dats = dict()
     parser = etree.XMLParser(encoding="utf-8")    
     games = etree.parse(file, parser=parser).findall(".//game")        
@@ -20,14 +20,14 @@ def parseDat(file):
                            cloneof,isbios,g)
             dats[g.attrib['name']] = datEntry
     
-    print('Dat %s : %i entries' %(file,len(dats)))
+    logger.log('Dat '+str(file)+' : '+str(len(dats))+' entries')
     return dats
 
-def parseDats(scriptDir,dataDir,setDats,usingSystems) :
+def parseDats(scriptDir,dataDir,setDats,usingSystems,logger) :
     dats = dict()    
     for setKey in usingSystems :        
         header = etree.parse(os.path.join(scriptDir,dataDir,setDats[setKey]),etree.XMLParser(encoding="utf-8")).findall(".//header")
-        dats[setKey] = parseDat(os.path.join(scriptDir,dataDir,setDats[setKey]))
+        dats[setKey] = parseDat(os.path.join(scriptDir,dataDir,setDats[setKey]),logger)
         dats[setKey+"Header"] = header[0]        
     return dats
   
