@@ -3,19 +3,15 @@
 
 import tkinter as Tk
 from tkinter import ttk,messagebox
-import conf,collections,os.path,sys
+import collections,os.path,shutil
 from operator import attrgetter
 from sorter import Sorter
+import _thread
 
 GUIString = collections.namedtuple('GUIString', 'id label help order')
 confFile = r"conf.conf"
 
-class GUI():
-
-    fbaKey = "fba_libretro"
-    mame2010Key = "mame2010"
-    mame2003Key = "mame2003"
-    setKeys = [fbaKey,mame2003Key,mame2010Key]
+class GUI():    
 
     def __init__(self,configuration,scriptDir,logger) :
         self.configuration = configuration
@@ -54,7 +50,7 @@ class GUI():
         self.romsetFrame.grid(column=0,row=0,sticky="EW",pady=5)
         self.romsetFrame.grid_columnconfigure(1, weight=1)
         setRow = 0
-        for key in self.setKeys :
+        for key in Sorter.setKeys :
             label = Tk.Label(self.romsetFrame, text=self.guiStrings[key].label)
             label.grid(column=0, row=setRow, padx=5,sticky="W")
             self.guiVars[key] = Tk.StringVar()
@@ -120,8 +116,8 @@ class GUI():
         keepLevelLabel = Tk.Label(self.parametersFrame, text=self.guiStrings['keepLevel'].label)
         keepLevelLabel.grid(column=0, row=2,sticky="W")
         self.guiVars['keepLevel'] = Tk.StringVar()
-        self.guiVars['keepLevel'].set('BADLY WORKING')
-        keepLevelComboBox = ttk.Combobox(self.parametersFrame, textvariable=self.guiVars['keepLevel'])
+        self.guiVars['keepLevel'].set(Sorter.getStatus(int(self.configuration['keepLevel'])))
+        keepLevelComboBox = ttk.Combobox(self.parametersFrame, state="readonly", textvariable=self.guiVars['keepLevel'])
         keepLevelComboBox.grid(column=1,row=2, sticky="W",pady=5)
         keepLevelComboBox['values'] = ('WORKING','MOSTLY WORKING','BADLY WORKING','NON WORKING')
         self.guiVars['keepNotTested'] = Tk.IntVar()
@@ -133,17 +129,19 @@ class GUI():
         exclusionTypeLabel.grid(column=0, row=4,sticky="W")
         self.guiVars['exclusionType'] = Tk.StringVar()
         self.guiVars['exclusionType'].set(self.configuration['exclusionType'])
-        exclusionTypeComboBox = ttk.Combobox(self.parametersFrame, textvariable=self.guiVars['exclusionType'])
+        exclusionTypeComboBox = ttk.Combobox(self.parametersFrame, state="readonly",textvariable=self.guiVars['exclusionType'])
         exclusionTypeComboBox.grid(column=1,row=4, sticky="W",pady=5,padx=5)
         exclusionTypeComboBox['values'] = ('STRICT','EQUAL','NONE')
         exclusionTypeComboBox.bind('<<ComboboxSelected>>',self.changeExclusionType)
         self.preferedSetLabel = Tk.Label(self.parametersFrame, text=self.guiStrings['preferedSet'].label)
-        self.preferedSetLabel.grid(column=0, row=5,sticky="W",pady=5)
+        self.preferedSetLabel.grid(column=0, row=5,sticky="W",pady=5)        
         self.guiVars['preferedSet'] = Tk.StringVar()
         self.guiVars['preferedSet'].set(self.configuration['preferedSet'])
-        self.preferedSetComboBox = ttk.Combobox(self.parametersFrame, textvariable=self.guiVars['preferedSet'])
+        self.preferedSetComboBox = ttk.Combobox(self.parametersFrame, state="readonly", textvariable=self.guiVars['preferedSet'])
         self.preferedSetComboBox.grid(column=1,row=5, sticky="W",pady=5,padx=5)
-        self.preferedSetComboBox['values'] = self.setKeys
+        self.preferedSetValues = Sorter.setKeys.copy()
+        self.preferedSetValues.append('')
+        self.preferedSetComboBox['values'] = self.preferedSetValues
         self.guiVars['usePreferedSetForGenre'] = Tk.IntVar()
         self.guiVars['usePreferedSetForGenre'].set(self.configuration['usePreferedSetForGenre'])
         self.usePreferedSetForGenreCheckButton = Tk.Checkbutton(self.parametersFrame,text=self.guiStrings['usePreferedSetForGenre'].label, variable=self.guiVars['usePreferedSetForGenre'], onvalue=1, offvalue = 0, command=self.changeUsePreferedSetForGenre)
@@ -157,72 +155,72 @@ class GUI():
         self.beatEmUpPreferedSetLabel.grid(column=0, row=0,sticky="W",pady=5)
         self.guiVars['BeatEmUpPreferedSet'] = Tk.StringVar()
         self.guiVars['BeatEmUpPreferedSet'].set(self.configuration['BeatEmUpPreferedSet'])
-        self.beatEmUpPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['BeatEmUpPreferedSet'])
+        self.beatEmUpPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly", textvariable=self.guiVars['BeatEmUpPreferedSet'])
         self.beatEmUpPreferedSetComboBox.grid(column=1,row=0, sticky="W",pady=5,padx=5)
-        self.beatEmUpPreferedSetComboBox['values'] = self.setKeys
+        self.beatEmUpPreferedSetComboBox['values'] = self.preferedSetValues
         self.gunPreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['GunPreferedSet'].label)
         self.gunPreferedSetLabel.grid(column=3, row=0,sticky="W",pady=5)
         self.guiVars['GunPreferedSet'] = Tk.StringVar()
         self.guiVars['GunPreferedSet'].set(self.configuration['GunPreferedSet'])
-        self.gunPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['GunPreferedSet'])
+        self.gunPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['GunPreferedSet'])
         self.gunPreferedSetComboBox.grid(column=4,row=0, sticky="W",pady=5,padx=5)
-        self.gunPreferedSetComboBox['values'] = self.setKeys
+        self.gunPreferedSetComboBox['values'] = self.preferedSetValues
         self.miscPreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['MiscPreferedSet'].label)
         self.miscPreferedSetLabel.grid(column=6, row=0,sticky="W",pady=5)
         self.guiVars['MiscPreferedSet'] = Tk.StringVar()
         self.guiVars['MiscPreferedSet'].set(self.configuration['MiscPreferedSet'])
-        self.miscPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['MiscPreferedSet'])
+        self.miscPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['MiscPreferedSet'])
         self.miscPreferedSetComboBox.grid(column=7,row=0, sticky="W",pady=5,padx=5)
-        self.miscPreferedSetComboBox['values'] = self.setKeys
+        self.miscPreferedSetComboBox['values'] = self.preferedSetValues
         self.platformPreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['PlatformPreferedSet'].label)
         self.platformPreferedSetLabel.grid(column=0, row=1,sticky="W",pady=5)
         self.guiVars['PlatformPreferedSet'] = Tk.StringVar()
         self.guiVars['PlatformPreferedSet'].set(self.configuration['PlatformPreferedSet'])
-        self.platformPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['PlatformPreferedSet'])
+        self.platformPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['PlatformPreferedSet'])
         self.platformPreferedSetComboBox.grid(column=1,row=1, sticky="W",pady=5,padx=5)
-        self.platformPreferedSetComboBox['values'] = self.setKeys
+        self.platformPreferedSetComboBox['values'] = self.preferedSetValues
         self.puzzlePreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['PuzzlePreferedSet'].label)
         self.puzzlePreferedSetLabel.grid(column=3, row=1,sticky="W",pady=5)
         self.guiVars['PuzzlePreferedSet'] = Tk.StringVar()
         self.guiVars['PuzzlePreferedSet'].set(self.configuration['PuzzlePreferedSet'])
-        self.puzzlePreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['PuzzlePreferedSet'])
+        self.puzzlePreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['PuzzlePreferedSet'])
         self.puzzlePreferedSetComboBox.grid(column=4,row=1, sticky="W",pady=5,padx=5)
-        self.puzzlePreferedSetComboBox['values'] = self.setKeys
+        self.puzzlePreferedSetComboBox['values'] = self.preferedSetValues
         self.racePreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['RacePreferedSet'].label)
         self.racePreferedSetLabel.grid(column=6, row=1,sticky="W",pady=5)
         self.guiVars['RacePreferedSet'] = Tk.StringVar()
         self.guiVars['RacePreferedSet'].set(self.configuration['RacePreferedSet'])
-        self.racePreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['RacePreferedSet'])
+        self.racePreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['RacePreferedSet'])
         self.racePreferedSetComboBox.grid(column=7,row=1, sticky="W",pady=5,padx=5)
-        self.racePreferedSetComboBox['values'] = self.setKeys
+        self.racePreferedSetComboBox['values'] = self.preferedSetValues
         self.runNGunPreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['RunNGunPreferedSet'].label)
         self.runNGunPreferedSetLabel.grid(column=0, row=2,sticky="W",pady=5)
         self.guiVars['RunNGunPreferedSet'] = Tk.StringVar()
         self.guiVars['RunNGunPreferedSet'].set(self.configuration['RunNGunPreferedSet'])
-        self.runNGunPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['RunNGunPreferedSet'])
+        self.runNGunPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['RunNGunPreferedSet'])
         self.runNGunPreferedSetComboBox.grid(column=1,row=2, sticky="W",pady=5,padx=5)
-        self.runNGunPreferedSetComboBox['values'] = self.setKeys
+        self.runNGunPreferedSetComboBox['values'] = self.preferedSetValues
         self.shootEmUpPreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['ShootEmUpPreferedSet'].label)
         self.shootEmUpPreferedSetLabel.grid(column=3, row=2,sticky="W",pady=5)
         self.guiVars['ShootEmUpPreferedSet'] = Tk.StringVar()
         self.guiVars['ShootEmUpPreferedSet'].set(self.configuration['ShootEmUpPreferedSet'])
-        self.shootEmUpPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['ShootEmUpPreferedSet'])
+        self.shootEmUpPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['ShootEmUpPreferedSet'])
         self.shootEmUpPreferedSetComboBox.grid(column=4,row=2, sticky="W",pady=5,padx=5)
-        self.shootEmUpPreferedSetComboBox['values'] = self.setKeys
+        self.shootEmUpPreferedSetComboBox['values'] = self.preferedSetValues
         self.sportPreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['SportPreferedSet'].label)
         self.sportPreferedSetLabel.grid(column=6, row=2,sticky="W",pady=5)
         self.guiVars['SportPreferedSet'] = Tk.StringVar()
         self.guiVars['SportPreferedSet'].set(self.configuration['SportPreferedSet'])
-        self.sportPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['SportPreferedSet'])
+        self.sportPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['SportPreferedSet'])
         self.sportPreferedSetComboBox.grid(column=7,row=2, sticky="W",pady=5,padx=5)
-        self.sportPreferedSetComboBox['values'] = self.setKeys
+        self.sportPreferedSetComboBox['values'] = self.preferedSetValues
         self.vsFightingPreferedSetLabel = Tk.Label(self.preferedSetForGenreFrame, text=self.guiStrings['VsFightingPreferedSet'].label)
         self.vsFightingPreferedSetLabel.grid(column=0, row=3,sticky="W",pady=5)
         self.guiVars['VsFightingPreferedSet'] = Tk.StringVar()
         self.guiVars['VsFightingPreferedSet'].set(self.configuration['VsFightingPreferedSet'])
-        self.vsFightingPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, textvariable=self.guiVars['VsFightingPreferedSet'])
+        self.vsFightingPreferedSetComboBox = ttk.Combobox(self.preferedSetForGenreFrame, state="readonly",textvariable=self.guiVars['VsFightingPreferedSet'])
         self.vsFightingPreferedSetComboBox.grid(column=1,row=3, sticky="W",pady=5,padx=5)
-        self.vsFightingPreferedSetComboBox['values'] = self.setKeys
+        self.vsFightingPreferedSetComboBox['values'] = self.preferedSetValues
         self.showHide()
 
     def changeExclusionType(self,event) :
@@ -234,31 +232,31 @@ class GUI():
     def showHide(self) :
         if self.guiVars['exclusionType'].get() == 'STRICT' :
             self.preferedSetLabel['state'] = 'normal'
-            self.preferedSetComboBox['state'] = 'normal'
+            self.preferedSetComboBox['state'] = 'readonly'
             self.usePreferedSetForGenreCheckButton['state'] = 'normal'
             if self.guiVars['usePreferedSetForGenre'].get() == 1 :
                 self.beatEmUpPreferedSetLabel['state'] = 'normal'
-                self.beatEmUpPreferedSetComboBox['state'] = 'normal'
+                self.beatEmUpPreferedSetComboBox['state'] = 'readonly'
                 self.gunPreferedSetLabel['state'] = 'normal'
-                self.gunPreferedSetComboBox['state'] = 'normal'
+                self.gunPreferedSetComboBox['state'] = 'readonly'
                 self.miscPreferedSetLabel['state'] = 'normal'
-                self.miscPreferedSetComboBox['state'] = 'normal'
+                self.miscPreferedSetComboBox['state'] = 'readonly'
                 self.platformPreferedSetLabel['state'] = 'normal'
-                self.miscPreferedSetComboBox['state'] = 'normal'
+                self.miscPreferedSetComboBox['state'] = 'readonly'
                 self.platformPreferedSetLabel['state'] = 'normal'
-                self.platformPreferedSetComboBox['state'] = 'normal'
+                self.platformPreferedSetComboBox['state'] = 'readonly'
                 self.puzzlePreferedSetLabel['state'] = 'normal'
-                self.puzzlePreferedSetComboBox['state'] = 'normal'
+                self.puzzlePreferedSetComboBox['state'] = 'readonly'
                 self.racePreferedSetLabel['state'] = 'normal'
-                self.racePreferedSetComboBox['state'] = 'normal'
+                self.racePreferedSetComboBox['state'] = 'readonly'
                 self.runNGunPreferedSetLabel['state'] = 'normal'
-                self.runNGunPreferedSetComboBox['state'] = 'normal'
+                self.runNGunPreferedSetComboBox['state'] = 'readonly'
                 self.shootEmUpPreferedSetLabel['state'] = 'normal'
-                self.shootEmUpPreferedSetComboBox['state'] = 'normal'
+                self.shootEmUpPreferedSetComboBox['state'] = 'readonly'
                 self.sportPreferedSetLabel['state'] = 'normal'
-                self.sportPreferedSetComboBox['state'] = 'normal'
+                self.sportPreferedSetComboBox['state'] = 'readonly'
                 self.vsFightingPreferedSetLabel['state'] = 'normal'
-                self.vsFightingPreferedSetComboBox['state'] = 'normal'
+                self.vsFightingPreferedSetComboBox['state'] = 'readonly'
             else :
                 self.beatEmUpPreferedSetLabel['state'] = 'disabled'
                 self.beatEmUpPreferedSetComboBox['state'] = 'disabled'
@@ -323,20 +321,61 @@ class GUI():
         self.proceedButton.grid(column=5,row=0,sticky="E",padx=3)
 
     def clickSave(self) :
-        print ('Save!')
+        self.logger.log ('\n<--------- Saving configuration --------->')
+        self.saveConfFile()
+        self.saveConfInMem()
+        
+    def saveConfFile(self) :        
+        confBackupFilePath = os.path.join(self.scriptDir,"conf.bak")
+        if os.path.exists(confBackupFilePath) :
+            os.remove(confBackupFilePath)
+        shutil.copy2(os.path.join(self.scriptDir,"conf.conf"),os.path.join(self.scriptDir,"conf.bak"))
+        confFile = open(os.path.join(self.scriptDir,"conf.conf"),"w",encoding="utf-8")
         listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))
         for key in listKeys :
-            print(str(key.order) + "\t"+ key.id + "\t" + key.help)
+            if key.id not in ['verify','save','proceed','confirm'] :  
+                if key.help :
+                        confFile.write('# ' + key.help.replace('#n','\n# ')+ '\n')
+                if key.id == 'images' :
+                    confFile.write(key.id + ' = ' + self.guiVars[self.guiStrings['images'].label+' #1'].get() + '|' + self.guiVars[self.guiStrings['images'].label+' #2'].get() +'\n')
+                elif key.id == 'keepLevel' :
+                    confFile.write(key.id + ' = ' + str(Sorter.getIntStatus(self.guiVars[key.id].get()))+'\n')            
+                else :                
+                    if key.id in self.guiVars :
+                        confFile.write(key.id + ' = ' + str(self.guiVars[key.id].get())+'\n')            
+        confFile.close()
+        self.logger.log ('    Configuration saved in conf.conf file')
+        
+    def saveConfInMem(self) :
+        listKeys = sorted(self.guiStrings.values(), key=attrgetter('order'))        
+        for key in listKeys :
+            if key.id not in ['verify','save','proceed','confirm'] :                
+                if key.id == 'images' :
+                    self.configuration['images']= self.guiVars[self.guiStrings['images'].label+' #1'].get() + '|' + self.guiVars[self.guiStrings['images'].label+' #2'].get()
+                elif key.id == 'keepLevel' :
+                    self.configuration['keepLevel'] = str(Sorter.getIntStatus(self.guiVars[key.id].get()))
+                else :                
+                    if key.id in self.guiVars :
+                        self.configuration[key.id] = str(self.guiVars[key.id].get())
+        self.logger.log('    Configuration saved in memory')       
 
     def clickVerify(self) :
-        self.writeToConsole('Verify!')
+        self.logger.log('\n<--------- Verify Parameters --------->')
+        error = False
+        for key in ['exportDir','fba_libretro','mame2010','mame2003','Images folder #1','Images folder #2'] :
+            if not os.path.exists(self.guiVars[key].get()) :
+                error = True
+                self.logger.log(key +' folder does not exist')
+        if self.guiVars['dryRun'].get() == 1 :
+            error= True
+            self.logger.log('WARNING: dryRun mode is used, only csv and gamelist files will be generated, roms adn ismages will not be copied')
+        if not error :
+            self.logger.log('All Good!')
 
     def clickProceed(self) :
-        print ('Proceed!')
-#        print(self.guiStrings['confirm'].label)
-#        print(self.guiVars['exportDir'].get())
+        self.logger.log('\n<--------- Starting Process --------->')
+        self.saveConfInMem()
         message=self.guiStrings['confirm'].help.replace('{outputDir}',self.guiVars['exportDir'].get()).replace('#n','\n')
-#        messagebox.askokcancel(self.window,message=message,icon='question',title=self.guiStrings['confirm'].help)
         result = messagebox.askokcancel(self.guiStrings['confirm'].label,message)
         if result :
             self.verifyButton['state'] = 'disabled'
@@ -344,14 +383,7 @@ class GUI():
             self.proceedButton['state'] = 'disabled'
             self.logger.log('\n<--------- Starting Process --------->')
             sorter = Sorter(self.configuration,self.scriptDir,self.logger)
-            sorter.prepare()
-            # create bestarcade romsets
-            self.logger.log('\n<--------- Create Sets --------->')            
-            sorter.createSets(sorter.allTests,sorter.dats)
-            self.logger.log("\n<--------- Detecting errors ----------->")
-            # checkErrors(allTests,configuration['keepLevel'])
-            self.logger.log('<--------- Process finished ----------->')
-#            input('\n             (Press Enter)              ')
+            _thread.start_new(sorter.process,())
 
     def drawConsole(self) :
         self.consoleFrame = Tk.Frame(self.root, padx=10)
@@ -362,16 +394,14 @@ class GUI():
         self.scrollbar = Tk.Scrollbar(self.consoleFrame, orient=Tk.VERTICAL,command=self.logTest.yview)
         self.scrollbar.grid(column=1,row=0,sticky=(Tk.N,Tk.S))
         self.logTest['yscrollcommand'] = self.scrollbar.set
-#        self.consoleFrame.update_idletasks()
-#        for var in self.guiVars :
-#            self.writeToConsole(var + " : " + str(self.guiVars[var].get()))
         self.logTest.after(10,self.updateConsoleFromQueue)
     
     def updateConsoleFromQueue(self):        
         while not self.logger.log_queue.empty():
-            line = self.logger.log_queue.get()
-            print('WRITECONSOLE')
+            line = self.logger.log_queue.get()            
             self.writeToConsole(line)
+            #TODO ?
+            self.root.update_idletasks()
         self.logTest.after(10,self.updateConsoleFromQueue)
         
     def writeToConsole(self, msg):                
@@ -385,12 +415,4 @@ class GUI():
         self.logTest.see(Tk.END)
         self.logTest['state'] = 'disabled'
 
-# Change ; as separator for imagePath, use |, check imagePath in guiStrings file -> OK check @ next generation
-# Handle keepLevel and images path vars in/out values correctly
-# Save to memory and to conf file (using order)
-# Change '#n' to '\n# ' on loading of guiStrings and/or saving
-# Fully integrate with sorter
 # Display folders status with icon
-# clean imports
-# solve threading problem
-# in GUI, use setKeys of Sorter

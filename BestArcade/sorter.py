@@ -25,6 +25,16 @@ class Sorter :
         self.scriptDir = scriptDir
         self.logger = logger
         
+    def process(self) :        
+        self.prepare()
+        # create bestarcade romsets
+        self.logger.log('\n<--------- Create Sets --------->')            
+        self.createSets(self.allTests,self.dats)
+        self.logger.log("\n<--------- Detecting errors ----------->")
+        self.checkErrors(self.allTests,self.configuration['keepLevel'])
+        self.logger.log('\n<--------- Process finished ----------->')
+#            input('\n             (Press Enter)              ')
+        
     def prepare(self) :
         self.usingSystems = self.useSystems(self.configuration)
         # create favorites containing fav games
@@ -115,11 +125,11 @@ class Sorter :
         csvFile.write("%i;%s;%s;%s;%s;%s;%s;%s;%s\n" 
                       %(score,genreExport,name,game,year,manufacturer,hardware,comments,notes))
     
-    def getStatus(self,status) :
+    def getStatus(cls,status) :
         if status == -1 :
             return 'UNTESTED'
         elif status == 0 :
-            return 'NON_WORKING'
+            return 'NON WORKING'
         elif status == 1 :
             return 'BADLY WORKING'
         elif status == 2 :
@@ -128,6 +138,24 @@ class Sorter :
             return 'WORKING'
         else :
             return 'UNTESTED &amp; FRESHLY ADDED'
+        
+    getStatus = classmethod(getStatus)
+    
+    def getIntStatus(cls,status) :
+        if status == 'UNTESTED' :
+            return -1
+        elif status == 'NON WORKING' :
+            return 0
+        elif status == 'BADLY WORKING' :
+            return 1
+        elif status == 'MOSTLY WORKING' :
+            return 2
+        elif status == 'WORKING' :
+            return 3
+        else :
+            return -1
+        
+    getIntStatus = classmethod(getIntStatus)
     
     def writeGamelistHiddenEntry(self,gamelistFile,game,genre,useGenreSubFolder) :
         gamelist.writeGamelistHiddenEntry(gamelistFile,game+".zip",genre,useGenreSubFolder)
@@ -270,4 +298,40 @@ class Sorter :
             
         self.logger.log ("\n<------------------ RESULTS ------------------>")
         self.logger.log("NOT FOUND IN ANY SET : "+ str(len(notInAnySet)))
-        self.logger.logList("",notInAnySet)               
+        self.logger.logList("",notInAnySet)
+
+    def checkErrors(self,inputTests,keepLevel) :
+        self.logger.log("Loading Output Tests")
+        outputTests = test.loadTests(Sorter.setKeys,os.path.join(self.configuration['exportDir']),self.usingSystems, self.logger)
+        self.logger.log("Possible errors")
+        for rom in inputTests.keys() :
+            
+            # new names : bbakraid,snowbro3,fantzn2x,dynwar,rbisland,sf,moomesa,leds2011,batrider,sbomber
+            #changedName = ['bkraidu','snowbros3','fantzn2','dw','rainbow','sf1','moo','ledstorm2','batrid','sbomberb']
+            
+            romNotInFav = True;
+            for genre in self.favorites :
+                for name in self.favorites[genre] :
+                    if name == rom :
+                        romNotInFav = False
+            
+            if romNotInFav :                    
+                self.logger.log("    Orphan rom %s not in favs" %rom)            
+            
+            # at least higher than keepLevel in one set
+            higherThanKeepLevel = True
+            for key in inputTests[rom] :
+                higherThanKeepLevel = higherThanKeepLevel and inputTests[rom][key].status >= int(keepLevel)
+            
+            if higherThanKeepLevel :
+                if rom not in outputTests :
+                    if not rom.startswith('mp_') and not rom.startswith('nss_') :
+                        self.logger.log("    ERROR "+rom+" not found in ouput csvs, but found in input")
+                else :
+                    for key in inputTests[rom] :
+                        if key not in outputTests[rom] :
+                            self.logger.log("    ERROR "+rom+" should be exported for "+key)
+                            
+# TODOS
+# missing doctype on generated dat  ?
+# if name from dat is empty, take one from test file
