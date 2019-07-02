@@ -1,20 +1,95 @@
 #!/usr/lib/python2.7/
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as etree
-import sys
+import sys, collections
 
 inDir = '/recalbox/share_init/system/.emulationstation/es_systems.cfg'
 outDir = '/recalbox/share/system/.emulationstation/es_systems.cfg'
 
-# Sort orders
-alphabetical = ['3do','amstradcpc','amiga600','amiga1200','amigacd32','apple2','atari2600','atari5200','atari7800','atari800','atarist','c64','cavestory','channelf','colecovision','daphne','dos','dreamcast','fba','fba_libretro','fds','gb','gba','gbc','gamecube','gamegear','gw','intellivision','jaguar','lutro','lynx','mame','mastersystem','megadrive','moonlight','msx','msx1','msx2','neogeo','neogeocd','ngp','ngpc','n64','nds','nes','o2em','oricatmos','pc98','pcengine','pcenginecd','pcfx','pokemini','ports','prboom','psx','psp','samcoupe','satellaview','saturn','scummvm','sega32x','segacd','sg1000','sufami','supergrafx','snes','thomson','vectrex','virtualboy','wii','wswan','wswanc','x68000','zx81','zxspectrum','imageviewer','random','favorites']
-hardwareType = ['channelf','atari2600','o2em','intellivision','colecovision','vectrex','atari5200','nes','sg1000','atari7800','mastersystem','fds','pcengine','megadrive','pcenginecd','supergrafx','snes','neogeo','segacd','sega32x','3do','jaguar','saturn','neogeocd','amigacd32','psx','pcfx','satellaview','sufami','n64','dreamcast','gamecube','wii','gw','gb','lynx','gamegear','virtualboy','gbc','ngp','ngpc','wswan','wswanc','gba','pokemini','nds','psp','fba','fba_libretro','mame','daphne','apple2','atari800','c64','zx81','pc98','zxspectrum','msx','msx1','amstradcpc','oricatmos','thomson','msx2','atarist','x68000','amiga600','samcoupe','amiga1200','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
-chronological =['channelf','apple2','atari2600','o2em','intellivision','atari800','colecovision','c64','vectrex','atari5200','gw','zx81','pc98','zxspectrum','nes','msx','msx1','sg1000','atari7800','amstradcpc','oricatmos','mastersystem','thomson','msx2','atarist','fds','x68000','pcengine','amiga600','megadrive','pcenginecd','supergrafx','samcoupe','gb','lynx','snes','gamegear','neogeo','segacd','sega32x','amiga1200','3do','jaguar','saturn','neogeocd','amigacd32','psx','pcfx','virtualboy','satellaview','sufami','n64','dreamcast','gbc','ngp','ngpc','wswan','wswanc','gba','pokemini','gamecube','nds','psp','wii','daphne','fba','fba_libretro','mame','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
-retrochrono = chronological[::-1][14::] + chronological[-14::] #14 last systems not ordered chronologically
-manufacturer =['amstradcpc','apple2','atari2600','atari800','atari5200','atari7800','atarist','lynx','jaguar','wswan','wswanc','c64','amiga600','amiga1200','amigacd32','o2em','colecovision','channelf','vectrex','intellivision','msx','msx1','msx2','samcoupe','pc98','pcengine','pcenginecd','supergrafx','pcfx','gw','nes','fds','gb','snes','virtualboy','satellaview','sufami','n64','gbc','gba','pokemini','gamecube','nds','wii','3do','sg1000','mastersystem','megadrive','gamegear','segacd','sega32x','saturn','dreamcast','x68000','zx81','zxspectrum','neogeo','neogeocd','ngp','ngpc','psx','psp','oricatmos','thomson','daphne','fba','fba_libretro','mame','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
-hmc =['atari2600','atari5200','atari7800','jaguar','o2em','colecovision','amigacd32','channelf','vectrex','intellivision','pcengine','pcenginecd','supergrafx','pcfx','nes','fds','snes','satellaview','sufami','n64','gamecube','wii','3do','sg1000','mastersystem','megadrive','segacd','sega32x','saturn','dreamcast','neogeo','neogeocd','psx','lynx','wswan','wswanc','ngp','ngpc','gw','gb','virtualboy','gbc','gba','pokemini','nds','gamegear','psp','daphne','fba','fba_libretro','mame','amstradcpc','atari800','atarist','apple2','c64','amiga600','amiga1200','msx','msx1','msx2','samcoupe','pc98','x68000','zx81','zxspectrum','oricatmos','thomson','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
-user =['amigacd32','satellaview','sufami','pokemini','pcfx','neogeocd','samcoupe','oricatmos','atari800','channelf','pc98','thomson','x68000','intellivision','atari5200','jaguar','nds','saturn','daphne','3do','apple2','atari2600','o2em','colecovision','c64','vectrex','gw','zx81','zxspectrum','nes','msx','msx1','sg1000','atari7800','amstradcpc','mastersystem','msx2','atarist','fds','pcengine','amiga600','megadrive','pcenginecd','supergrafx','gb','lynx','snes','gamegear','neogeo','segacd','sega32x','amiga1200','psx','virtualboy','n64','dreamcast','gbc','ngp','ngpc','wswan','wswanc','gba','gamecube','psp','wii','fba','fba_libretro','mame','dos','scummvm','prboom','ports','lutro','cavestory','moonlight','imageviewer','random','favorites']
+# new static sort data
+System =  collections.namedtuple('System', 'name fullname manufacturer type releasedate')
 
+def buildSystems() :
+    systems = []
+    systems.append(System('3do','3DO','Panasonic','1-console',1993))
+    systems.append(System('amstradcpc','Amstrad CPC','Amstrad','4-computer',1984))
+    systems.append(System('amiga600','Amiga 600','Commodore','4-computer',1991))
+    systems.append(System('amiga1200','Amiga 1200','Commodore','4-computer',1992))
+    systems.append(System('amigacd32','Amiga CD32','Commodore','1-console',1994))
+    systems.append(System('apple2','Apple II','Apple','4-computer',1977))
+    systems.append(System('atari2600','Atari 2600','Atari','1-console',1977))
+    systems.append(System('atari5200','Atari 5200','Atari','1-console',1982))
+    systems.append(System('atari7800','Atari 7800','Atari','1-console',1986))
+    systems.append(System('atari800','Atari 800','Atari','4-computer',1979))
+    systems.append(System('atarist','Atari ST','Atari','4-computer',1985))
+    systems.append(System('c64','Commodore 64','Commodore','4-computer',1982))
+    systems.append(System('cavestory','Cave Story','Pixel','5-ports',3730))
+    systems.append(System('channelf','Fairchild Channel F','Fairchild Semiconductor','1-console',1976))
+    systems.append(System('colecovision','ColecoVision','Coleco','1-console',1982))
+    systems.append(System('daphne','Daphne','Miscellaneous','3-arcade',3000))
+    systems.append(System('dos','DOS','Microsoft','4-computer',3680))
+    systems.append(System('dreamcast','Dreamcast','Sega','1-console',1998))
+    systems.append(System('fba','Final Burn Alpha','Miscellaneous','3-arcade',3650))
+    systems.append(System('fba_libretro','Final Burn Alpha Libretro','Miscellaneous','3-arcade',3660))
+    systems.append(System('fds','Famicom Disk System','Nintendo','1-console',1986))
+    systems.append(System('gb','Gameboy','Nintendo','2-portable',1989))
+    systems.append(System('gba','Gameboy Advance','Nintendo','2-portable',2001))
+    systems.append(System('gbc','Gameboy Color','Nintendo','2-portable',1998))
+    systems.append(System('gamecube','Gamecube','Nintendo','1-console',2001))
+    systems.append(System('gamegear','Game Gear','Sega','2-portable',1990))
+    systems.append(System('gw','Game & Watch','Nintendo','2-portable',1980))
+    systems.append(System('intellivision','Intellivision','Mattel','1-console',1979))
+    systems.append(System('jaguar','Jaguar','Atari','1-console',1993))
+    systems.append(System('lutro','Lutro','Miscellaneous','5-ports',3722))
+    systems.append(System('lynx','Lynx','Atari','2-portable',1989))
+    systems.append(System('mame','Mame','Miscellaneous','3-arcade',3670))
+    systems.append(System('mastersystem','Master System','Sega','1-console',1985))
+    systems.append(System('megadrive','Megadrive','Sega','1-console',1988))
+    systems.append(System('moonlight','Moonlight','Miscellaneous','5-ports',3740))
+    systems.append(System('msx','MSX','Microsoft','4-computer',1983))
+    systems.append(System('msx1','MSX1','Microsoft','4-computer',1983))
+    systems.append(System('msx2','MSX2','Microsoft','4-computer',1985))
+    systems.append(System('neogeo','Neo Geo','SNK','1-console',1990))
+    systems.append(System('neogeocd','Neo Geo CD','SNK','1-console',1994))
+    systems.append(System('ngp','Neo Geo Pocket','SNK','2-portable',1998))
+    systems.append(System('ngpc','Neo Geo Pocket Color','SNK','2-portable',1999))
+    systems.append(System('n64','Nintendo 64','Nintendo','1-console',1996))
+    systems.append(System('nds','Nintendo DS','Nintendo','2-portable',2004))
+    systems.append(System('nes','Nintendo Entertainment System','Nintendo','1-console',1983))
+    systems.append(System('o2em','Odyssey 2 / Videopac','Magnavox / Philips','1-console',1978))
+    systems.append(System('oricatmos','Oric Atmos','Tangerine Computer Systems','4-computer',1984))
+    systems.append(System('pc98','PC98','NEC','4-computer',1982))
+    systems.append(System('pcengine','PC Engine','NEC','1-console',1987))
+    systems.append(System('pcenginecd','PC Engine CD','NEC','1-console',1988))
+    systems.append(System('pcfx','PC-FX','NEC','1-console',1994))
+    systems.append(System('pokemini','Pokemini','Nintendo','2-portable',2001))
+    systems.append(System('ports','Ports','Miscellaneous','5-ports',3700))
+    systems.append(System('prboom','PrDoom','Miscellaneous','5-ports',3710))
+    systems.append(System('psx','Playstation','Sony','1-console',1994))
+    systems.append(System('psp','PSP','Sony','2-portable',2004))
+    systems.append(System('samcoupe','Sam Coupe','Miles Gordon Technology','4-computer',1989))
+    systems.append(System('satellaview','Satellaview','Nintendo','1-console',1995))
+    systems.append(System('saturn','Saturn','Sega','1-console',1994))
+    systems.append(System('scummvm','ScummVM','Miscellaneous','4-computer',3690))
+    systems.append(System('sega32x','Sega 32x','Sega','1-console',1994))
+    systems.append(System('segacd','Mega-CD','Sega','1-console',1991))
+    systems.append(System('sg1000','SG-1000','Sega','1-console',1983))
+    systems.append(System('sufami','Sufami turbo','Bandai','1-console',1996))
+    systems.append(System('supergrafx','SuperGrafx ','NEC','1-console',1989))
+    systems.append(System('snes','Super Nintendo','Nintendo','1-console',1990))
+    systems.append(System('thomson','MO5','Thomson','4-computer',1984))
+    systems.append(System('vectrex','Vectrex','MB','1-console',1982))
+    systems.append(System('virtualboy','Virtual Boy','Nintendo','2-portable',1995))
+    systems.append(System('wii','Wii','Nintendo','1-console',2006))
+    systems.append(System('wswan','WonderSwan ','Bandai','2-portable',1999))
+    systems.append(System('wswanc','WonderSwan Color','Bandai','2-portable',2000))
+    systems.append(System('x68000','X68000','Sharp','4-computer',1987))
+    systems.append(System('zx81','ZX81','Sinclair','4-computer',1981))
+    systems.append(System('zxspectrum','ZX Spectrum','Sinclair','4-computer',1982))
+    systems.append(System('imageviewer','Image Viewer','Miscellaneous','6-system',4000))
+    systems.append(System('random','Random','Miscellaneous','6-system',4100))
+    systems.append(System('favorites','Favorites','Miscellaneous','6-system',4200))
+    return systems
 
 def get(i,e):
     ll=i.find(e)        
@@ -41,7 +116,7 @@ def writesystems(ll,f,sortlist):
                 found = True
         
         if not found :
-            print("Not found in ordered list : %s , adding at the end" %name)
+            print("Not found in ordered list : %s , appending at the end" %name)
             root.append(system)
     
     # last 3 (imageviewer, random, favorites)
@@ -65,42 +140,73 @@ def listsystems(p):
 
 def buildSortType(sortType):
     if sortType == None :
-        sortType = raw_input("Please choose your system order : (A)lphabetical, (H)ardwareType, (C)hronological, (R)etrochronological, (M)anufacturer, Mi(x)ed or (U)ser : ").lower()
+        sortType = raw_input("Please choose your system order : (A)lphabetical, (H)ardwareType, (C)hronological, (R)etrochronological, (M)anufacturer, or Mi(x)ed : ").lower()
     
+    systems = buildSystems()   
     if sortType in ['a','alphabetical'] :
-        print ("Standard Sort")
-        return alphabetical
+        print ("Alphabetical Sort")
+        head = headByType(systems,'6-system')
+        head.sort(key=lambda s: (s.fullname))
+        systems = head + fixedTailByType(systems,'6-system')
+        return systems
     elif sortType in ['h','hardwaretype'] :
         print ("Hardware Type Sort")
-        return hardwareType
+        systems.sort(key=lambda s: (s.type,s.releasedate))
+        return systems
     elif sortType in ['c','chronological'] :
         print ("Chronological Sort")
-        return chronological
+        systems.sort(key=lambda s: (s.releasedate))
+        return systems
     elif sortType in ['r','retrochronological'] :
-        print ("Retrochronological Sort")
-        return retrochrono
+        print ("Retrochronological Sort")        
+        head = headByYear(systems,3000)
+        head.sort(key=lambda s: (-s.releasedate))
+        systems = head + fixedTailByYear(systems,3000)
+        return systems
     elif sortType in ['m','manufacturer'] :
-        print ("Manufacturer Sort")
-        return manufacturer
+        print ("Manufacturer Sort")        
+        head = headByType(systems,'6-system')
+        head.sort(key=lambda s: (s.manufacturer, s.releasedate))
+        systems = head + fixedTailByType(systems,'6-system')
+        return systems
     elif sortType in ['x','mixed'] :
-        print ("Mixed (H/M/C)")
-        return hmc
-    elif sortType in ['u','user'] :
-        print ("User Custom Sort")
-        return user
+        print ("Mixed (H/M/C)")        
+        head = headByType(systems,'6-system')
+        head.sort(key=lambda s: (s.type,s.manufacturer, s.releasedate))
+        systems = head + fixedTailByType(systems,'6-system')
+        return systems    
     else :
         return None
 
+# Systems which must go at the end
+def fixedTailByType(systems, limit) :
+    tail = list(filter(lambda f: f.type >= limit, systems))
+    tail.sort(key=lambda s: (s.type,s.releasedate))
+    return tail
+
+#Systems to be sorted in most case
+def headByType(systems, limit) :
+    return list(filter(lambda f: f.type < limit, systems))
+
+# Systems which must go at the end
+def fixedTailByYear(systems, limit) :
+    tail = list(filter(lambda f: f.releasedate >= limit, systems))
+    tail.sort(key=lambda s: (s.type,s.releasedate))
+    return tail
+
+#Systems to be sorted in most case
+def headByYear(systems, limit) :
+    return list(filter(lambda f: f.releasedate < limit, systems))
+
+
 if __name__ == "__main__":
-    print ("Diag test %i %i %i %i %i %i %i " %(len(alphabetical),len(hardwareType),len(chronological),len(retrochrono),len(manufacturer),len(hmc),len(user)))
     sortType = buildSortType(sys.argv[1].lower() if len(sys.argv) > 1 else None)
-    print(sortType)
-    if sortType != None :
+    sortedSys = [s.name for s in sortType]
+    print("New sort :")
+    print(sortedSys)
+    if sortType is not None :
         ll=listsystems(inDir)
-        writesystems(ll,outDir,sortType)        
+        writesystems(ll,outDir,sortedSys)        
     else :
         print("No valid order selected")
-        
-
-#the lxml folder with _init_ ie /usr/lib/python2.7/dist-packages/lxml/
-#np.. you may have to change the "from lxml import xy" line in your project  
+ 

@@ -18,6 +18,5 @@ Orders for now are :
 * **Retrochronological** : ordered by inversed release date (newer systems appear first)
 * **Manufacturer** : ordered alphabetically by manufacturer's name of the system
 * **Mixed** : ordered by hardware type, then manufacturer, then chronological
-* **User** : by default, copies Standard but you can modify it to your liking, contact me if you want it included in the script
 
 You can use as command line or input parameter the first letter of the order (except for Mixed use x) or its full name
