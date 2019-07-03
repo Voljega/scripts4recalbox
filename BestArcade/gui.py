@@ -337,7 +337,10 @@ class GUI():
                 if key.help :
                         confFile.write('# ' + key.help.replace('#n','\n# ')+ '\n')
                 if key.id == 'images' :
-                    confFile.write(key.id + ' = ' + self.guiVars[self.guiStrings['images'].label+' #1'].get() + '|' + self.guiVars[self.guiStrings['images'].label+' #2'].get() +'\n')
+                    imagesValue = self.guiVars[self.guiStrings['images'].label+' #1'].get()
+                    if self.guiStrings['images'].label+' #2' in self.guiVars :
+                        imagesValue = imagesValue + '|' + self.guiVars[self.guiStrings['images'].label+' #2'].get()
+                    confFile.write(key.id + ' = ' + imagesValue +'\n')
                 elif key.id == 'keepLevel' :
                     confFile.write(key.id + ' = ' + str(Sorter.getIntStatus(self.guiVars[key.id].get()))+'\n')            
                 else :                
@@ -351,7 +354,10 @@ class GUI():
         for key in listKeys :
             if key.id not in ['verify','save','proceed','confirm'] :                
                 if key.id == 'images' :
-                    self.configuration['images']= self.guiVars[self.guiStrings['images'].label+' #1'].get() + '|' + self.guiVars[self.guiStrings['images'].label+' #2'].get()
+                    imagesValue = self.guiVars[self.guiStrings['images'].label+' #1'].get()
+                    if self.guiStrings['images'].label+' #2' in self.guiVars :
+                        imagesValue = imagesValue + '|' + self.guiVars[self.guiStrings['images'].label+' #2'].get()
+                    self.configuration['images']=  imagesValue
                 elif key.id == 'keepLevel' :
                     self.configuration['keepLevel'] = str(Sorter.getIntStatus(self.guiVars[key.id].get()))
                 else :                
@@ -416,3 +422,4 @@ class GUI():
         self.logTest['state'] = 'disabled'
 
 # Display folders status with icon
+# TODO tooltips !

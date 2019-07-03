@@ -24,3 +24,5 @@ if __name__ == "__main__":
     logger.log('\n<--------- Load Configuration File --------->')
     logger.printDict(configuration)
     gui.draw()
+    
+#TODO exit terminal when GUI is closed

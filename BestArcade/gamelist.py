@@ -28,7 +28,7 @@ def writeGamelistEntry(gamelist,romName,name,desc,year,frontPic,developer,publis
     gamelist.write("        <image>"+frontPic+"</image>\n")
     gamelist.write("        <developer>"+developer+"</developer>\n")
     gamelist.write("        <publisher>"+publisher+"</publisher>\n")
-    gamelist.write("        <genre>"+genre+"</genre>\n")
+    gamelist.write("        <genre>"+genre.replace('[','').replace(']','')+"</genre>\n")
     gamelist.write("    </game>\n")
     
 def writeGamelistFolder(gamelist,name,image):
