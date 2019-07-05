@@ -1,6 +1,10 @@
 ## Randomizer
 
-This script allow you to launch randomly a game from any system or from a given system, from all or specific genres, with a certain name or not
+This script allow you to launch randomly a game.
+ - from a specific system, a set of systems or from all systems
+ - from a specific genre, a set of genres or all genres (using the `<genre>` tag in your `gamelist.xml`
+ - with name containing one string or one of several strings
+ - from a combination of these three criterias
 
 ### How it works
 
@@ -40,7 +44,7 @@ If some game didn't launch you can look at the log */recalbox/share/randomlog.cs
 ## Initialisation
 
 * Before using the script, you need to init the system using command `python randomizer.py` or `python randomizer.py init`
-* The script will scan all your systems having a valid gamelist and construct all needed rdm files and scrape them
+* The script will scan all your systems having a valid gamelist and construct all needed rdm files in the `random` system and scrape them
 * Now just reboot and it should work flawlessly :)
 * You can reinit the random script at any time in the future, you need to kill emulationstation before and reboot after
 
@@ -48,7 +52,7 @@ If some game didn't launch you can look at the log */recalbox/share/randomlog.cs
 
 Rdm files now contains three tags to allow randomization of games base on three criteria, values are sepatated by ';' :
 * `systems:` list of systems (short name) which can be randomy selected. all systems if this tag is not present. case insensitive
-* `genres:` list of genres which can be randomy selected. all genres if tag is not present. case insentitive, can contin spaces
+* `genres:` list of genres which can be randomy selected. all genres if tag is not present. case insentitive, can contain spaces
 * `gamestrings:` strings contained in name of selectable games. case insensitive
 
 Here are a few examples :
