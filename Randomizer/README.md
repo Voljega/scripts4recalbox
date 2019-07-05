@@ -36,10 +36,10 @@ If some game didn't launch you can look at the log */recalbox/share/randomlog.cs
 	    <emulators/>
 	</system>
 	```
-* If you used my SystemSorter script or duplicated your se_systems file there, you also need to modify */recalbox/share/system/.emulationstation/es_systems.cfg*
+* If you used my SystemSorter script or duplicated your se_systems file there, you also need to modify `/recalbox/share/system/.emulationstation/es_systems.cfg`
 * Kill EmulationStation with `/etc/init.d/S31emulationstation stop` (wait for it to die)
-* Copy the random folder into  */recalbox/share/roms* directory
-* Copy theme/random directory in /recalbox/share_init/system/.emulationstation/themes/recalbox-next
+* Copy the `random` folder into  `/recalbox/share/roms` directory
+* Copy `theme/random` directory in `/recalbox/share_init/system/.emulationstation/themes/recalbox-next`
 
 ## Initialisation
 
@@ -50,13 +50,13 @@ If some game didn't launch you can look at the log */recalbox/share/randomlog.cs
 
 ## Rdm format and customisation
 
-Rdm files now contains three tags to allow randomization of games base on three criteria, values are sepatated by ';' :
+Rdm files now contains three tags to allow randomization of games base on three criteria, values are sepatated by `;` :
 * `systems:` list of systems (short name) which can be randomy selected. all systems if this tag is not present. case insensitive
 * `genres:` list of genres which can be randomy selected. all genres if tag is not present. case insentitive, can contain spaces
 * `gamestrings:` strings contained in name of selectable games. case insensitive
 
 Here are a few examples :
-* Pinball games on All systems
+* Platform games on All systems
 ```
 genres:platform
 ```
