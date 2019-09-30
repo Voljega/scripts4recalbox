@@ -1,4 +1,6 @@
 ## SystemSorter
+*Compatible with Recalbox 6.1*
+
 
 A script permitting the modifying of display order of systems.
 
