@@ -14,7 +14,7 @@ favorites = dict()
 configuration = dict()
 usingSystems = []
     
-if __name__ == "__main__":    
+if __name__ == "__main__":
     scriptDir = os.path.abspath(os.path.dirname(sys.argv[0]))
     logger = Logger()    
     logger.log('Script path : '+scriptDir)
